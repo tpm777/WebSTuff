@@ -1,0 +1,736 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<%@ Register TagPrefix="asp" Namespace="AjaxControlToolkit" Assembly="AjaxControlToolkit"%>
+
+
+<%@ Register Assembly="obout_ComboBox" Namespace="Obout.ComboBox" TagPrefix="cc3" %>
+
+<!DOCTYPE html>
+<link rel="stylesheet" href="../StyleSheet.css" type="text/css" />
+
+<script type="text/javascript" src="Scripts/jquery-1.8.2.min.js"></script>
+
+<script type="text/javascript" src="Scripts/jquery-ui-1.9.2.js"></script>
+<script type="text/javascript" src="Scripts/jquery-ui-1.9.2.min.js"></script>
+
+<script type="text/javascript" src="Scripts/jquery.qtip.min.js"></script>
+
+<%--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>--%>
+
+
+
+
+<script type="text/javascript">
+    var scrollPos = function () {
+        return $(window).scrollTop();
+    };
+
+
+    $(".open-dialog").click(function (e) {
+
+        e.preventDefault();
+
+        // Open the dialog
+
+        $(".basic-dialog").dialog("open");
+
+    });
+
+
+
+
+    function setScroll(val, posId) {
+        posId.value = val.scrollTop;
+    }
+    //only required for w/o <city /><place />ajax</place /></city /> page ScrollWOAjax.
+    function scrollTo(what, posId) {
+        if (what != "0")
+            document.getElementById(what).scrollTop = document.getElementById(posId).value;
+    }
+    function ConfirmOnDelete(item) {
+
+        if (confirm("Are you sure to delete: " + item + "?") == true)
+
+            return true;
+
+        else
+
+            return false;
+
+    }
+    function handleKeyUp(tBox) {
+
+        var frm = document.forms[0];
+        if (tBox.id == "txbRequired1") {
+            var btnSave = document.getElementById("btnSave");
+
+
+
+            if (tBox.value != '') {
+                btnSave.disabled = false;
+            }
+            else
+                btnSave.disabled = true;
+
+        }
+
+    }
+
+    $("[src*=plus]").live("click", function () {
+        $(this).closest("tr").after("<tr><td></td><td colspan = '999'>" + $(this).next().html() + "</td></tr>")
+        $(this).attr("src", "images/minus.png");
+        $(this).next().next().val(1);
+
+    });
+    $("[src*=minus]").live("click", function () {
+        $(this).attr("src", "images/plus.png");
+        $(this).closest("tr").next().remove();
+        $(this).next().next().val("");
+    });
+
+
+    $(function () {
+        $("[id*=IsExpanded]").each(function () {
+            if ($(this).val() == "1") {
+                $(this).closest("tr").after("<tr><td></td><td colspan = '999'>" + $("[id*=pnlRFQDetailSum]", $(this).closest("tr")).html() + "</td></tr>")
+                $("[src*=plus]", $(this).closest("tr")).attr("src", "images/minus.png");
+            }
+        });
+    })
+
+    function handleChange(opt) {
+        if (!confirm('Are you sure?')) {
+            opt.selectedIndex = opt.oldIndex;
+        }
+        else {
+            __doPostBack('cmbStatus', '')
+        }
+    }
+    //var nSelectionedValue;
+    //function CmbStatusHasFocused(sender, eventArgs) {
+
+    //    nSelectionedValue = sender.value();
+
+    //}
+
+
+    function AllowSelectionChange(sender, eventArgs) {
+        var nSelectionedValue;
+
+
+
+        //alert(nSelectionedValue.toString() + sender.value());
+
+        if (confirm('Continue?'))
+            return true;
+        else
+            return false;
+    }
+
+    function setStyle(x) {
+
+        document.getElementById(x.id).style.backgroundColor = "yellow"
+    }
+
+    function ResetStyle(x) {
+        if (ValidateText(x) == false) {
+
+            return false;
+        }
+        document.getElementById(x.id).style.backgroundColor = "white"
+
+    }
+
+
+    function ValidateText(x) {
+        var xx = document.getElementById(x.id).getAttribute("Validate");
+        var regex = xx;
+
+        var re = new RegExp(xx);
+
+        var strToTest = document.getElementById(x.id).value;
+        var strErrMeg = document.getElementById(x.id).getAttribute("ValErrMsg");
+
+        if (strToTest == '') {
+            ResetStyle(x);
+            return;
+        }
+
+    }
+
+    function ComboBox1_ItemClick(sender, index) {
+
+        var item = sender.getItemByIndex(index);
+        var checkbox = item.getElementsByTagName('INPUT')[0];
+        checkbox.checked = !checkbox.checked;
+
+        //  updateComboBoxSelection();
+
+        var selectedItems = new Array();
+        var checkboxes = sender.ItemsContainer.getElementsByTagName('INPUT');
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                selectedItems.push(sender.options[i].text);
+            }
+        }
+
+        sender.setText(selectedItems.join(', '));
+    }
+
+
+    function ComboBox1_Click(x) {
+
+/*        var item = ContentPlaceHolder1_ComboBox1.getItemByIndex(index);
+        var checkbox = item.getElementsByTagName('INPUT')[0];
+        checkbox.checked = !checkbox.checked;
+*/
+        var ComboBox1 = document.getElementById(x);
+        updateComboBoxSelection();
+    }
+
+
+    function updateComboBoxSelection() {
+        var selectedItems = new Array();
+        var checkboxes = ComboBox1.ItemsContainer.getElementsByTagName('INPUT');
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                selectedItems.push(ComboBox1.options[i].text);
+            }
+        }
+
+        ComboBox1.setText(selectedItems.join(', '));
+    }
+
+    //function updateCheckBoxesSelection() {
+    //    var currentValue = document.getElementById('ctl00_ContentPlaceHolder1_ComboBox13_ctl00_ContentPlaceHolder1_ComboBox13').value;
+
+    //    for (var i = 0; i < ComboBox13.options.length; i++) {
+    //        var item = ComboBox1.getItemByIndex(i);
+    //        var checkbox = item.getElementsByTagName('INPUT')[0];
+    //        checkbox.checked = (',' + currentValue + ',').indexOf(',' + ComboBox13.options[i].value + ',') != -1;
+    //    }
+    //}
+    //function updateItemsSelection() {
+    //    preventCheckBoxesSelection = true;
+
+    //    var arrSelectedValues = new Array();
+    //    for (var i = 0; i < ComboBox13.options.length; i++) {
+    //        var item = ComboBox13.getItemByIndex(i);
+    //        var checkbox = item.getElementsByTagName('INPUT')[0];
+    //        if (checkbox.checked) {
+    //            arrSelectedValues.push(ComboBox13.options[i].value);
+    //        }
+
+    //        ComboBox13._dropDownList.unselectItemByIndex(i);
+    //    }
+
+
+    //    ComboBox1.value(arrSelectedValues.join(','));
+    //    preventCheckBoxesSelection = false;
+    //}
+
+</script>
+<script src="/Scripts/jquery.subsession.js" type="text/javascript"> </script> 
+
+<style type="text/css">
+    .ob_iCboIC, .ob_iDdlIC
+    {
+        z-index: 100002 !important;
+    }
+</style>
+
+    <link rel="stylesheet" href="/resources/demos/style.css"/>
+    <link rel="stylesheet" href="table.css" type="text/css" />
+    <link rel="stylesheet" href="StyleSheet.css" type="text/css" />
+
+    <style type="text/css">
+
+   .button {
+  font-family: arial;
+  font-weight: bold;
+  color: #0C0C0C !important;
+  font-size: 17px;
+  text-shadow: 1px 1px 0px #DEDDDC;
+  box-shadow: 1px 1px 3px #BEE2F9;
+  padding: 10px 25px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  border: 2px solid #A3A3A3;
+  background: #C8EEAC;
+  background: linear-gradient(top,  #E0E0E0,  #848383);
+  background: -ms-linear-gradient(top,  #E0E0E0,  #848383);
+  background: -webkit-gradient(linear, left top, left bottom, from(#E0E0E0), to(#848383));
+  background: -moz-linear-gradient(top,  #E0E0E0,  #848383);
+}
+
+
+.button:hover {
+  color: #14396A !important;
+  background: #468CCF;
+  background: linear-gradient(top,  #468CCF,  #63B8EE);
+  background: -ms-linear-gradient(top,  #468CCF,  #63B8EE);
+  background: -webkit-gradient(linear, left top, left bottom, from(#468CCF), to(#63B8EE));
+  background: -moz-linear-gradient(top,  #468CCF,  #63B8EE);
+}
+
+
+
+.buttonAttachments {
+  font-family: arial;
+  font-weight: bold;
+  color: #fa0808 !important;
+  font-size: 17px;
+
+  box-shadow: 1px 1px 3px #BEE2F9;
+  padding: 10px 25px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  border: 2px solid #A3A3A3;
+  background: #C8EEAC;
+  background: linear-gradient(top,  #E0E0E0,  #848383);
+  background: -ms-linear-gradient(top,  #E0E0E0,  #848383);
+  background: -webkit-gradient(linear, left top, left bottom, from(#E0E0E0), to(#848383));
+  background: -moz-linear-gradient(top,  #E0E0E0,  #848383);
+}
+
+
+
+ .addeditdeletebutton {
+  font-family: arial;
+  font-weight: bold;
+  color: #0C0C0C !important;
+  font-size: 17px;
+  text-shadow: 1px 1px 0px #DEDDDC;
+  box-shadow: 1px 1px 3px #BEE2F9;
+  padding: 0px 0px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  border: 2px solid #A3A3A3;
+  background: #C8EEAC;
+  background: linear-gradient(top,  #E0E0E0,  #848383);
+  background: -ms-linear-gradient(top,  #E0E0E0,  #848383);
+  background: -webkit-gradient(linear, left top, left bottom, from(#E0E0E0), to(#848383));
+  background: -moz-linear-gradient(top,  #E0E0E0,  #848383);
+}
+
+        .auto-style7
+        {
+            width: 715px;
+            border: none;
+        }
+
+        .removeTableBorders
+        {
+            border: none;
+            outline: none;
+            background-color: #EEEEEE;
+        }
+
+        .removeTableBordersNoBkgColor
+        {
+            border: none;
+            outline: none;
+        }
+        .removeTableBordersCenterAlign
+        {
+            border: none;
+            outline: none;
+            text-align: center;
+            width: 250px;
+        }
+
+
+
+        .removeTableBordersRightAlign
+        {
+            border: none;
+            outline: none;
+            text-align: right;
+            width: 250px;
+        }
+
+        .removeTableBordersLeftAlign
+        {
+            border: none;
+            outline: none;
+            text-align: left;
+            width: 300px;
+        }
+
+        .removeTableBordersLbl
+        {
+            width: 200px;
+            border: none;
+            outline: none;
+            background-color: #F0F0F0;
+            background: linear-gradient(to right, #F0F0F0, #FCFCFC); /* Standard syntax */
+            padding: 0px;
+        }
+
+        .lblTableBordersnarrow
+        {
+            width: 200px;
+            outline: none;
+            background-color: #F0F0F0;
+            background: linear-gradient(to right, #F0F0F0, #FCFCFC); /* Standard syntax */
+            padding: 0px;
+            border-style: solid;
+            border-width: thin;
+        }
+
+
+
+
+        .removeTableBordersTXB
+        {
+            width: 230px;
+            border: none;
+            outline: none;
+            background-color: #FCFCFC;
+            top: 0px;
+            left: 0px;
+            padding: 0px;
+            text-overflow:ellipsis; 
+            white-space:nowrap;
+            overflow:hidden; 
+
+        }
+
+
+        .removeTextBoxBordersTXB
+        {
+            border: none;
+            outline: none;
+            background-color: #FCFCFC;
+            top: 0px;
+            left: 0px;
+            padding: 0px;
+        }
+
+
+        .noborders
+        {
+            border: none;
+            outline: none;
+            width: 400px;
+        }
+
+        .modalBackground
+        {
+            background-color: Black;
+            filter: alpha(opacity=90);
+            opacity: 0.8;
+        }
+
+        .modalPopup
+        {
+            background-color: #FFFFFF;
+            border-width: 3px;
+            border-style: solid;
+            border-color: black;
+            padding-top: 10px;
+            padding-left: 10px;
+            width: 1000px;
+            height: 600px;
+        }
+
+        .Grid td
+        {
+            background-color: #A1DCF2;
+            color: black;
+            font-size: 10pt;
+            line-height: 150%;
+            border:thin;  
+        }
+
+        .Grid th
+        {
+            background-color: #3AC0F2;
+            color: White;
+            font-size: 10pt;
+            line-height: 150%;
+        }
+
+        .ChildGrid td
+        {
+            background-color: #eee !important;
+            color: black;
+            font-size: 10pt;
+            line-height: 150%;
+   
+        }
+
+        .ChildGrid th
+        {
+            background-color: #6C6C6C !important;
+            color: White;
+            font-size: 10pt;
+            line-height: 150%;
+        }
+
+        .ChildGrid tr
+        {
+            padding-bottom:0px;
+            padding-top:0px;  
+            margin-top:0px;
+            margin-bottom:0px;  
+            grid-row-span:0;   
+      
+             
+        }
+
+        .NotesLabel
+        {
+            vertical-align: text-top;
+        }
+
+        .ValuesCSS
+        {
+            vertical-align:text-top;
+            text-align:left; 
+        }
+
+        .CenterItemStype
+        {
+            margin-left:5%;
+            margin-right:5%; 
+        }
+
+        .tableHdr
+        {
+            table-layout: fixed;
+            width: 800px;
+            word-wrap: break-word;
+        }
+
+        .auto-style20
+        {
+            border-style: none;
+            border-color: inherit;
+            border-width: medium;
+            width: 200px;
+            outline: none;
+            background-color: #F0F0F0;
+            /* Standard syntax */ padding: 0px;
+            height: 41px;
+        }
+
+        .auto-style21
+        {
+            border-style: none;
+            border-color: inherit;
+            border-width: medium;
+            width: 100px;
+            outline: none;
+            background-color: #FCFCFC;
+            top: 0px;
+            left: 0px;
+            height: 41px;
+        }
+
+   .rounded_corners
+
+    {
+
+        border: 1px solid Black;
+
+        -webkit-border-radius: 5px;
+
+        -moz-border-radius: 5px;
+
+        border-radius: 5px;
+
+        overflow: hidden;
+
+    }
+
+    .rounded_corners td, .rounded_corners th
+
+    {
+
+        border: 1px solid Black;
+
+        font-family: Arial;
+
+        font-size: 10pt;
+
+        /*text-align: center;*/
+
+    }
+
+    .rounded_corners table table td
+
+    {
+
+        border-style: none;
+
+    }
+           .item
+        {
+            position: relative;
+            width: 100%;
+        }
+        
+        .label
+        {
+            position: absolute;
+            top: 0px;
+            left: 25px;
+        }
+    </style>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>RFQ Main</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <asp:ContentPlaceHolder id="head" runat="server">
+            <meta charset="utf-8">
+
+    <title>RFQ Alpha</title>
+
+    <%--  <link rel="stylesheet" href="http://localhost:30379/code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">--%>
+
+    <script type="text/javascript">
+        try {
+            window.onload = function () {
+                Obout.Interface.OboutCore.getLeft = function (element) {
+                    var position = $common.getLocation(element);
+                    return position.x;
+                }
+
+                Obout.Interface.OboutCore.getTop = function (element) {
+                    var position = $common.getLocation(element);
+                    return position.y;
+                }
+            }
+        }
+        catch (Err) {
+
+        };
+
+
+        function setStyle(x) {
+
+            document.getElementById(x.id).style.backgroundColor = "yellow"
+        }
+
+        function ResetStyle(x) {
+            if (ValidateText(x) == false) {
+
+                return false;
+            }
+            document.getElementById(x.id).style.backgroundColor = "white"
+
+        }
+
+
+        function ValidateText(x) {
+            var xx = document.getElementById(x.id).getAttribute("Validate");
+            var regex = xx;
+
+            var re = new RegExp(xx);
+
+            var strToTest = document.getElementById(x.id).value;
+            var strErrMeg = document.getElementById(x.id).getAttribute("ValErrMsg");
+
+            if (strToTest == '') {
+                ResetStyle(x);
+                return;
+            }
+
+
+            if (re.test(strToTest)) {
+                //  alert("success");
+                ResetStyle(x);
+            }
+            else {
+                alert("Error: " + strErrMeg);
+                //
+
+                document.getElementById(x.id).value = "";
+                document.getElementById(x.id).focus();
+
+                ResetStyle(x);
+                //       document.getElementById(x.id).scrollIntoView();
+
+                return false;
+
+            }
+
+
+            //if (ValidateText(x) == false) {
+            //    return false;
+            //}
+        }
+
+
+    </script>
+
+    </asp:ContentPlaceHolder>
+</head>
+
+
+<body class="bodyArea">
+  
+    <form id="form1" runat="server" style="width:inherit" >
+          <asp:ToolkitScriptManager ID="ToolkitScriptManager1" runat="Server" >
+                        <Scripts>
+                           
+                <asp:scriptReference Name="jquery"  Path="~/Scripts/json2.js">
+                 
+                 </asp:scriptreference> 
+                <asp:scriptReference Name="jquery" Path="~/Scripts/jquery-1.8.2.js">
+                 </asp:scriptreference> 
+
+                <asp:scriptReference Name="jquery.ui.combined" Path="~/Scripts/jquery-ui-1.9.2.js">
+                 </asp:scriptreference> 
+
+                <asp:scriptReference Name="jquery" Path="~/Scripts/jquery.qtip.min.js">
+                 </asp:scriptreference> 
+
+            </Scripts>
+
+            </asp:ToolkitScriptManager>
+
+<%--        <asp:ScriptManager ID="ScriptManager1" runat="server">
+            <Scripts>
+                <asp:ScriptReference Name="jquery" Path="~/Scripts/json2.js" />
+                <asp:ScriptReference Name="jquery" Path="~/Scripts/jquery-1.8.2.js" />
+                <asp:ScriptReference Name="jquery.ui.combined" Path="~/Scripts/jquery-ui-1.9.2.js" />
+                <asp:ScriptReference Name="jquery" Path="~/Scripts/jquery.qtip.min.js" />
+            </Scripts>
+        </asp:ScriptManager>--%>
+
+
+
+       <div id="header" class="content">
+
+            <div style="margin-left:20%;margin-right:20%">
+                <table>
+                    <tr>
+                        <td class="noborders">
+                            <asp:Image ID="Image1" runat="server" ImageUrl="~/Images/horiz_ComputypeLogoColor_240_62.jpg" Height="71px" Width="282px" />
+                        </td>
+                        <td class="noborders">
+                            <asp:Label ID="lblTtitle" runat="server" Text="Request For Quote" Font-Size="XX-Large" Font-Bold="True"></asp:Label>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+        <br />
+        <div style="display: none">
+            <cc3:ComboBox ID="ComboBox1" runat="server" Style="display: none"></cc3:ComboBox>
+        </div>
+    <div style="width:inherit; margin-left:0%;margin-right:0%">
+        <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">
+        
+        </asp:ContentPlaceHolder>
+    </div>
+    </form>
+</body>
+</html>

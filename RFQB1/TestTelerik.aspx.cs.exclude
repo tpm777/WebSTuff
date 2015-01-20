@@ -1,0 +1,2236 @@
+﻿using System;
+using System.Configuration;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Text;
+using Xrm;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
+using System.Net;
+using System.Net.Mail;
+using Obout.Interface; 
+using Obout.Grid;
+using Obout.ComboBox;
+
+using RFQDBFunctions;
+using RFQSecurity;
+
+using Telerik.Web.UI;
+using FreeTextBoxControls;
+
+
+using Progress.Open4GL.DynamicAPI;
+using Progress.Open4GL.Proxy;
+using Progress.Open4GL;
+
+using System.DirectoryServices.AccountManagement;  
+
+
+
+public partial class TestTelerik : System.Web.UI.Page
+{
+    DataTable dt = new DataTable();
+    string m_conString = ConfigurationManager.ConnectionStrings["RFQConnectionString"].ConnectionString;
+    string m_strStartPage = ConfigurationManager.AppSettings["StartPage"];
+    
+    int m_nGridValuesOffset = 2;
+    int m_nRFQID = -1;
+    bool __DEBUG = true;
+    string m_strDateTimeFormat = "MM/dd/yyyy HH:mm";
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+   //     btnEditRow.Attributes.Add("onclick","$(this).closest("tr").after("<tr><td></td><td colspan = '999'>" + $(this).next().html() + "</td></tr>")"); 
+        string strRequestor = null;       
+        string strRFQID = null;
+
+
+    //    RFQInputDetails.ButtonClick1 += new EventHandler(btnTest_Click);
+   //     btnClose.Attributes.Add("OnClick", "btnClose_Click");  
+
+        txbRFQNum.ToolTip = "This is a tool tip for RFQID";
+        lblRFQDescription.ToolTip = "CRM Supplied Description";
+  
+        txbRFQDescription.ToolTip = "RFQ Description Tip";
+        lblRequestor.ToolTip = "Supplied from CRM"; 
+        txbRequestor.ToolTip = "Supplied From CRM";
+
+        lblCustomer.ToolTip = "CRM Supplied Customer Name";
+        lblCustomerName.ToolTip = "Click To View Customer Information";
+
+        lblCurrencyCRM.ToolTip = "Supplied from CRM";
+
+         
+        cmbStatus.ToolTip = "Status Tool Tip";
+
+        lblStatus.ToolTip = "List Description of Status Here";
+
+        txbDateCreated.ToolTip = "Date Created Tooltip";
+        txbDateQuoted.ToolTip = "Date Quoted";
+        txbDateSubmitted.ToolTip = "date Submitted";
+
+        btnSave.ToolTip = "Save Buttom Tooltip";
+        btnSubmit.ToolTip = "Submit Button Tooltip";
+        btnUpload.ToolTip = "Upload ToolTip";
+
+  //      tooltip1.AddTooltipControl(lblRFQNum);   
+  //      tooltip1.AddTooltipControl(txbRFQNum);
+  //      tooltip1.AddTooltipControl(lblRFQDescription);   
+  //      tooltip1.AddTooltipControl(txbRFQDescription);
+  //      tooltip1.AddTooltipControl(lblStatus);
+  //      tooltip1.AddTooltipControl(cmbStatus);
+
+  //      tooltip1.AddTooltipControl(lblRequestor);
+  //      tooltip1.AddTooltipControl(txbRequestor); 
+
+
+  //      tooltip1.AddTooltipControl(txbDateCreated);
+  ////      tooltip1.AddTooltipControl(txbDateQuoted);
+  //      tooltip1.AddTooltipControl(txbDateSubmitted);
+
+
+  //      tooltip1.AddTooltipControl(lblCustomer);
+  //      tooltip1.AddTooltipControl(lblCustomerName);  
+
+  //      ToolTipCmdBtns.AddTooltipControl(btnUpload);
+  //      ToolTipCmdBtns.AddTooltipControl(btnSubmit);
+  ////      ToolTipTypes.AddTooltipControl(rbList1); 
+
+
+        Session["UserID"] = GetUserID(this);
+
+        if (!AllowUserAccess())
+        {
+            DisplayMsg("Access Not Allowed");
+            return;
+        }
+      
+        if (!IsPostBack)
+        {
+
+
+            SetHeaderFontSizes();
+            
+            InitBottomCmdBtns(false);
+
+            //if (!AllowUserAccess())
+            //{
+            //    DisplayMsg("Accessed Not Allowed");
+            //    return;
+
+            //}
+
+            Session["UserID"] = GetUserID(this);
+   
+            Session["DONOTBIND"] = false;
+
+            //    Test();  // Test Epicor Connection.
+        //    cmbStatus.BorderWidth = 0;
+         //   cmbStatus.BorderStyle = BorderStyle.None;
+
+            lblCurrencyCRM.BorderStyle = BorderStyle.None;
+
+             
+
+            string[] ctrls;
+            Session["DisplayingSubTypes"] = false;
+            lblNewMediaType.Text = "Select Type:"; 
+
+            lblRFQNum.Text = "<a href='RFQIDInSystem.aspx' Title='This is a tip'>RFQID</a>";
+
+            //txbRequired1.Attributes.Add("onkeyup", "handleKeyUp(this);");
+
+            //rbList1.Items[0].Text = "Labels";
+            //rbList1.Items[1].Text = "Printers";
+            //rbList1.Items[2].Text = "Scanners";
+            //rbList1.Items[3].Text = "Service";
+
+            //pnlAddOption.Visible = false;
+
+            InitControls();
+
+           
+
+            // test to see if coming from RFQ List
+            try
+            {
+                if ((string)Request.QueryString["RFQID"] != null)
+                {
+                    imgBtn.Visible = false;
+                    txbRFQNum.Text = (string)Request.QueryString["RFQID"];
+                    if (( txbRFQNum.Text.ToUpper()!="NEW")&&( txbRFQNum.Text.ToUpper()!="NULL"))
+                    {
+                            RFQHeaderDB db = new RFQHeaderDB();
+                            dt = db.GetRFQIDRecord(m_conString, txbRFQNum.Text);
+
+                           if (dt.Rows.Count > 0)
+                           {
+                                InitBottomCmdBtns(true);
+                                if (!SetHeaderValues(dt)) return;
+
+                                if (!string.IsNullOrEmpty(txbRFQNum.Text))
+                                {
+                                    Session["RFQID"] = txbRFQNum.Text;
+                                    RFQDetail oRFQDetail = new RFQDetail();
+
+
+                            
+                                    grdRequiredValues.DataSource = null;
+                                    //                  grdRequiredValues.DataSourceID = null;
+                                    grdRequiredValues.DataSource = oRFQDetail.GetRFQIDDistinctDetailRecord(txbRFQNum.Text);
+                                    Session["OriginalData"] = (DataTable)oRFQDetail.GetRFQIDDistinctDetailRecord(txbRFQNum.Text);
+
+                                    Session["ADDNEWRFQDETAILS"] = false;
+                                    grdRequiredValues.DataBind();
+
+                            //grdMasterRFQDetails.DataSource = oRFQDetail.GetRFQIDDistinctDetailRecord(txbRFQNum.Text);
+                            //grdMasterRFQDetails.DataBind();
+
+                                Session["RFQMAXLINE"] = oRFQDetail.GetNextMaxLineID(txbRFQNum.Text);
+
+                                if ((int)Session["RFQMAXLINE"] > 1)
+                                {
+
+                                    btnSubmit.Visible = true; 
+                                    int nSelectedValue = Convert.ToInt16(cmbStatus.SelectedValue);
+  
+                                    if (nSelectedValue >= 20)
+                                        btnSubmit.Text = "Update"; 
+
+                                }
+
+
+
+                                //For Re Exapnding the expanded rows 
+                                //    foreach (GridViewRow row in grdRequiredValues.Rows)
+                                //    {        
+                                //        if (row.RowType == DataControlRowType.DataRow) 
+                                //        {             
+                                //            HiddenField IsExpanded = row.FindControl("IsExpanded") as HiddenField;  
+                                //            IsExpanded.Value = Request.Form[IsExpanded.UniqueID]; 
+                                //        }
+                                //    } 
+                            }
+                            LockRFQFromChange();
+                        }
+                        else
+                        {
+                            txbRFQNum.Text = "new";
+                            InitBottomCmdBtns(true);
+
+                        }
+                    }
+                    else    // new RFQ Request
+                    {
+                        Session["RFQMAXLINE"] = 1;
+                        NewRFQRequest();
+                        InitBottomCmdBtns(false);
+                        pnlSelects.Visible = true;
+                        pnlMain.Visible = true;
+                    }
+                    foreach (GridViewRow row in grdRequiredValues.Rows)
+                    {
+                        if (row.RowType == DataControlRowType.DataRow)
+                        {
+                            HiddenField IsExpanded = row.FindControl("IsExpanded") as HiddenField;
+                            IsExpanded.Value = Request.Form[IsExpanded.UniqueID];
+                        }
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+
+
+
+            }
+        }
+        else  //Is a POSTBACK
+        {
+           // try
+            //{
+            //    if (!NewRFQRequest())
+            //    {
+            //        // TBD
+
+            //    }
+            //}
+            //catch (Exception err)
+            //{
+
+
+
+
+            //}
+            if (!string.IsNullOrEmpty((string)Session["ContactID"]))
+                BuildHyperLink(lblCustomerName, (string)Session["ContactID"], "Contact");
+
+            if (!string.IsNullOrEmpty((string)Session["AccountID"]))
+                BuildHyperLink(lblParentCustomerName, (string)Session["AccountID"],"Account");
+    
+        }
+    }
+
+    private void SetHeaderFontSizes()
+    {
+        int nHeaderTextBoxFontSize = 12;
+        txbRFQNum.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbRFQDescription.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbDateCreated.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbDateLastRevised.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbDateQuoted.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbDateSubmitted.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbRequestor.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+  //      cmbStatus.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        lblCustomerName.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);   
+        txbDateLastRevised.Font.Size   =  FontUnit.Point(nHeaderTextBoxFontSize);
+        txbDateLastChanged.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize); 
+        txbDateRequested.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbChangedBy.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);
+        txbReasonForChange.Font.Size = FontUnit.Point(nHeaderTextBoxFontSize);    
+    }
+    private bool NewRFQRequest()
+    {
+ 
+
+
+        if ((string)Request.QueryString["OppID"] != null)
+        {
+
+            if ((string)Request.QueryString["Currency"] != null)
+            {
+                lblCurrencyCRM.Text   = (string)Request.QueryString["Currency"];
+         
+
+            }
+
+
+            if ((string)Request.QueryString["Requestor"] != null)
+                txbRequestor.Text = (string)Request.QueryString["Requestor"];
+
+            if ((string)Request.QueryString["RFQID"] != null)
+                txbRFQNum.Text  = (string)Request.QueryString["RFQID"];
+
+            if ((string)Request.QueryString["RFQDescription"] != null)
+                txbRFQDescription.Text = (string)Request.QueryString["RFQDescription"];
+
+
+
+            if ((string)Request.QueryString["CustomerName"] != null)
+            {
+                Session["ContactName"] = (string)Request.QueryString["CustomerName"];
+
+
+
+                string strLinkInfo = "lblTemp";
+                lblCustomerName.Text = (string)Request.QueryString["CustomerName"];
+
+
+                //lblCustomerName.Controls.Add(lnkCustomer);  // need to correct the name
+                if ((string)Request.QueryString["CustomerID"] != null)
+                {
+                    Session["ContactID"] = (string)Request.QueryString["CustomerID"];
+                    BuildHyperLink(lblCustomerName, (string)Request.QueryString["CustomerID"], "Contact");
+
+                }
+
+
+
+            }
+            else
+            {
+                Session["ContactName"] = "Not Available";
+                Session["ContactID"] = "Not Available";
+
+            }
+
+
+            if ((string)Request.QueryString["AccountName"] != null)
+            {
+                Session["AccountName"] = (string)Request.QueryString["AccountName"];
+
+
+
+                string strLinkInfo = "lblTemp";
+                lblParentCustomerName.Text = (string)Request.QueryString["AccountName"];
+
+
+
+                //lblCustomerName.Controls.Add(lnkCustomer);  // need to correct the name
+
+                //  BuildHyperLink(lblParentCustomerName, strLinkInfo);
+
+
+
+
+
+            }
+            else
+            {
+                Session["AccountName"] = "Not Available";
+
+            }
+            if ((string)Request.QueryString["AccountID"] != null)
+            {
+                Session["AccountID"] = (string)Request.QueryString["AccountID"];
+
+
+
+                string strLinkInfo = "lblTemp";
+                //lblParentCustomerName.Text = (string)Request.QueryString["CustomerID"];
+
+
+
+                //lblCustomerName.Controls.Add(lnkCustomer);  // need to correct the name
+
+                BuildHyperLink(lblParentCustomerName, (string)Request.QueryString["AccountID"],"Account");
+
+
+
+
+
+            }
+            else
+            {
+                Session["AccountID"] = "Not Available";
+
+            }
+            
+            //       lblCustomerName.Text = (string)Request.QueryString["CustomerID"];
+
+            //            lblCustomerName.Text = "<a href='ViewCustomerInfo.aspx'>" + (string)Request.QueryString["CustomerID"] + "</a>";
+
+            if ((string)Request.QueryString["OppID"] != null)
+                Session["OppID"] = (string)Request.QueryString["OppID"];
+
+
+            if (txbRFQNum.Text.ToUpper() == "NEW")
+            {
+                cmbStatus.EmptyText = "New"; 
+                RFQHeaderDB objRFQHeader = new RFQHeaderDB();
+             //   txbDateCreated.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+                // txbRFQNum.Text = Convert.ToString(objRFQHeader.GetNextHeaderRecord());
+                // CreateNewRFQHeaderRecord();
+                return true;
+            }
+
+            return true;
+
+        }
+        return false;
+
+    }
+
+    private void InitBottomCmdBtns(bool blnState)
+    {
+
+        btnUpload.Enabled = blnState;
+        btnUpload.Visible = blnState;
+        rfqdetail.Visible = blnState;
+
+        //btnSubmit.Enabled = blnState;
+        //btnSubmit.Visible = blnState;
+
+
+        //btnSave.Enabled = blnState;
+        //btnSave.Visible = blnState;
+  
+
+    }
+    private int FindOccurence(string substr)
+    {
+
+        string reqstr = Request.Form.ToString();
+
+        return ((reqstr.Length - reqstr.Replace(substr, "").Length)
+
+                          / substr.Length);
+
+    }
+
+
+    protected void gvRFQDetails_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        int nIndex = 0;
+        string strFieldRef = null;
+        RFQDetail oRFQDetail = new RFQDetail();
+
+
+   
+
+
+        GridView grdView = (GridView)sender; // cast sender to TextBox
+        GridViewRow row = (GridViewRow)grdView.NamingContainer;  // It will return the child gridview row in which textBox
+
+
+
+        nIndex = row.RowIndex;
+
+ 
+        string strLineID = row.Cells[1].Text  ;
+        string strType = row.Cells[2].Text;
+        string strSubType = row.Cells[3].Text;
+   
+
+        GridViewRow parent_row = grdRequiredValues.Rows[nIndex];
+
+
+
+        GridView gvRFQDetail = parent_row.FindControl("gvRFQDetails") as GridView;
+
+
+
+
+        
+
+
+  //      strFieldRef = gvRFQDetail.Rows[e.NewEditIndex].Cells[0].Text;
+        System.Web.UI.WebControls.Label lblTest = (System.Web.UI.WebControls.Label)grdView.Rows[e.NewEditIndex].Cells[0].FindControl("lbFieldRef");
+
+        strFieldRef = lblTest.Text;
+        
+
+
+
+        gvRFQDetail.EditIndex = e.NewEditIndex;
+
+        grdView.EditIndex = e.NewEditIndex;
+ 
+    //    System.Web.UI.WebControls.Label lblTest = (System.Web.UI.WebControls.Label)grdView.Rows[e.NewEditIndex].FindControl("lblValue");
+
+//        DropDownList cmbValue = (DropDownList)grdView.Rows[e.NewEditIndex].FindControl("cmbValue");
+
+//        gvRFQDetail.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail where RFQID={0} AND Line={1} ", txbRFQNum.Text, strLineID));
+
+        gvRFQDetail.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail CROSS JOIN RFQFieldControlReference where RFQID={0} AND Line={1} AND RFQDetail.FieldRef = RFQFieldControlReference.FieldRef AND RFQDetail.Type = RFQFieldControlReference.Type AND RFQDetail.SubType = RFQFieldControlReference.SubType", txbRFQNum.Text, strLineID));
+
+        
+        gvRFQDetail.EditIndex = e.NewEditIndex;
+    
+
+        gvRFQDetail.DataBind();
+
+       // Request.Form.Clear();   
+    
+    }
+
+    private void DisplayMsg(string sMsg)
+    {
+        CmpWebBaseMsgBox.MBox.Show(sMsg);
+    }
+
+
+    protected void RFQInputDetail_ButtonClickDemo(object sender, EventArgs e)
+    {
+       Response.Write("It's working");
+    }
+    private void InitControls()
+    {
+        btnSave.Enabled = false;
+        btnSubmit.Visible = false;
+        btnUpload.Visible = false; 
+ 
+
+    }
+    public void rbList1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        //if (string.IsNullOrEmpty(txbDateRequested.Text))
+        //{
+        //    DisplayMsg("Please Select Date Required");
+        //    rbList1.SelectedIndex = -1; 
+        //    txbDateRequested.Focus();
+        //    return;
+
+        //}
+
+        if ((bool)Session["DisplayingSubTypes"])
+        {
+
+            Session["RFQSubType"] = rbList1.SelectedValue;
+            DisplayRFQTypes();
+            Session["DisplayingSubTypes"] = false;
+
+
+            RFQInputDetails.RFQType = (string)Session["RFQType"];
+            RFQInputDetails.RFQSubType = (string)Session["RFQSubType"];
+            if (string.IsNullOrEmpty(txbRFQNum.Text))
+            {
+                Session["RFQID"] = 1111111; // Convert txbRFQNum.Text;
+            }
+            else
+            {
+                if (txbRFQNum.Text.ToUpper() == "NEW")
+                {
+                    CreateNewRFQHeaderRecord();
+                    //RFQHeaderDB oDBHdr = new RFQHeaderDB();
+                    //txbRFQNum.Text = Convert.ToString(oDBHdr.GetNextHeaderRecord());
+
+    //                Session["RFQID"] = Convert.ToInt32( txbRFQNum.Text);
+    //                Session["RFQMAXLINE"] = 1;
+
+                }
+                else
+                    Session["RFQID"] = Convert.ToInt32(txbRFQNum.Text);
+            }
+
+            DisplayModalEditBox(rbList1.SelectedIndex);
+
+        }
+        else
+        {
+            Session["RFQType"] = rbList1.SelectedValue;
+            lblNewMediaType.Text = rbList1.SelectedValue; 
+            RFQInputDetails.RFQType = rbList1.SelectedValue;
+            DisplaySubTypes(rbList1.SelectedValue);
+            imgBtn.Visible = true;
+
+        }
+
+
+     
+       
+    }
+
+    private void DisplayRFQTypes()
+    {
+        RFQTypes clsRFQType = new RFQTypes();
+        DataTable dt = clsRFQType.GetRFQTypes();
+        rbList1.DataSourceID = null;
+
+        lblNewMediaType.Text = "Select Type:"; 
+
+        rbList1.DataSource = dt;
+        rbList1.DataTextField = "Type";
+        rbList1.DataValueField = "Type";
+        rbList1.DataBind();
+        Session["DisplayingSubTypes"] = false;
+
+
+    }
+    private void DisplaySubTypes(string strSubType)
+    {
+        if (!string.IsNullOrEmpty(strSubType))
+        {
+            RFQSubTypes clsSubTypes = new RFQSubTypes();
+
+            DataTable dt = clsSubTypes.GetRFQSubTypes(strSubType);
+            rbList1.DataSourceID = null;
+    
+
+            rbList1.DataSource = dt;
+            rbList1.DataTextField = "SubType";
+            rbList1.DataValueField = "SubType";
+            rbList1.DataBind();
+            Session["DisplayingSubTypes"] = true;
+
+        }
+
+    }
+    private void DisplayModalEditBox(int nIndex)
+    {
+        //AddRowToDetailGrid();
+        //return;
+       
+        string strRFQType = (string)Session["RFQType"];
+        string strRFQSubType = (string)Session["RFQSubType"];
+
+        if ((strRFQType.ToUpper() == "MEDIA") && (strRFQSubType.ToUpper() == "BLANK"))
+        {
+            RFQInputDetails.CreateDynamicTable(strRFQType, strRFQSubType);
+        }
+        else if ((strRFQType.ToUpper() == "HARDWARE") && (strRFQSubType.ToUpper() == "PRINTER"))
+        {
+            RFQInputDetails.CreateDynamicTable(strRFQType, strRFQSubType);
+
+        }
+        else if ((strRFQType.ToUpper() == "HARDWARE") && (strRFQSubType.ToUpper() == "SCANNER"))
+        {
+            RFQInputDetails.CreateDynamicTable(strRFQType, strRFQSubType);
+
+        }
+        else if ((strRFQType.ToUpper() == "HARDWARE") && (strRFQSubType.ToUpper() == "APPLICATOR"))
+        {
+            RFQInputDetails.CreateDynamicTable(strRFQType, strRFQSubType);
+
+        }
+        else if ((strRFQType.ToUpper() == "HARDWARE") && (strRFQSubType.ToUpper() == "REWIND/UNWIND"))
+        {
+            RFQInputDetails.CreateDynamicTable(strRFQType, strRFQSubType);
+
+        }
+        else
+        {
+            string strMsg = string.Format("Type [{0}] and SubType [{1}] Have Not Been Implemented", strRFQType, strRFQSubType);   
+            DisplayMsg(strMsg);
+            return;
+        }
+            btnCloseTest.Visible = true;
+            mp1.Show();
+
+
+    }
+
+    protected void btnAdd_Click(object sender, EventArgs e)
+    {
+
+
+    }
+
+    private void ResetForNewOption()
+    {
+
+      //  pnlAddOption.Visible = false;
+  //      pnlSalesOptions.Visible = false;
+   //     pnlSummaryGrid.Visible = false;
+
+        rbList1.SelectedIndex = -1;
+
+
+
+    }
+  
+
+    protected void btnReset_Click(object sender, EventArgs e)
+    {
+        ResetForNewOption();
+        //ResetTextBoxes();
+
+        grdRequiredValues.DataSource = null;
+        grdRequiredValues.DataBind();
+
+        //grdOptionalValue.DataSource = null;
+        //grdOptionalValue.DataBind();
+    }
+    protected void btnUpload_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("RFQFileUpload.aspx");
+    }
+
+    protected void btnEditLineItem_Click(object sender, EventArgs e)
+    {
+        // Response.Redirect("~/UploadFile.aspx");
+         
+      //  LabelSizeandFinish uc =
+     //(LabelSizeandFinish)Page.LoadControl("LabelSizeAndFinish.ascx");
+     //   PlaceHolder1.Controls.Add(uc); 
+
+    //    mp1.Show();
+    }
+
+    protected void btnViewCustomer_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ViewCustomerInfo.aspx",false);
+    }
+    protected void grdRequiredValues_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+     
+    }
+    protected void grdRequiredValues_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+   
+
+ 
+    }
+    protected void grdRequiredValues_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        GridView grdView = (GridView)sender; //
+    //    GridViewRow row = (GridViewRow)grdView.NamingContainer;  // It will return the child gridview row in which textBox
+
+        GridViewRow row = grdView.Rows[e.RowIndex];   
+
+        RFQDetail oRFQDetail = new RFQDetail();
+
+        
+
+        int nIndex = row.RowIndex;
+
+        string strLineNum = row.Cells[1].Text;
+
+        oRFQDetail.DeleteRFQDetailLine(txbRFQNum.Text, strLineNum);
+
+        Response.Redirect(m_strStartPage +"?RFQID=" + txbRFQNum.Text, true);  
+         
+
+
+    }
+
+    protected void OnRowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            string item = e.Row.Cells[1].Text;
+            foreach (Button button in e.Row.Cells[2].Controls.OfType<Button>())
+            {
+                if (button.CommandName == "Delete")
+                {
+                    button.Attributes["onclick"] = "if(!confirm('Do you want to delete " + item + "?')){ return false; };";
+                }
+            }
+        }
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            RFQDetail oRFQDetail = new RFQDetail();
+
+            string strRFQID = txbRFQNum.Text;
+            string strLineItem  = e.Row.Cells[1].Text;
+
+            GridView gvRFQDetail = e.Row.FindControl("gvRFQDetails") as GridView;
+
+    
+
+            gvRFQDetail.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail where RFQID={0} AND Line={1}", strRFQID, strLineItem));
+ 
+            gvRFQDetail.DataBind();
+        }
+    }
+
+    protected void grdRequiredValues_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        //if ((bool)Session["DONOTBIND"])
+        //{
+        //    return;
+
+        //}
+        string strRFQID = null;
+        strRFQID = Convert.ToString(Session["RFQID"]); 
+        if (e.Row.RowState != DataControlRowState.Edit) // check for RowState
+        {
+
+            if (e.Row.RowType == DataControlRowType.DataRow) //check for RowType
+            {
+
+                string id = e.Row.Cells[3].Text; // Get the id to be deleted
+
+                //cast the ShowDeleteButton link to linkbutton 
+
+                //                Button lb = (Button)e.Row.Cells[0].FindControl("Delete");
+                //              ((LinkButton)e.Row.Cells[0].Controls[0]).OnClientClick = "return confirm('Do you really want to delete?');";
+
+
+
+            }
+
+            
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+
+                if (string.IsNullOrEmpty(strRFQID))
+                {
+
+                    DisplayMsg("RFQID Can Not Be Blank");
+                    return;
+                }
+                RFQDetail oRFQDetail = new RFQDetail();
+
+                string strLineItem = e.Row.Cells[1].Text;
+
+                GridView gvRFQDetail = e.Row.FindControl("gvRFQDetails") as GridView;
+
+
+                if ((bool)Session["ADDNEWRFQDETAILS"]==false)
+                {
+//                    gvRFQDetail.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail where RFQID={0} AND Line={1}", strRFQID, strLineItem));
+                      gvRFQDetail.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail CROSS JOIN RFQFieldControlReference where RFQID={0} AND Line={1} AND RFQDetail.FieldRef = RFQFieldControlReference.FieldRef AND RFQDetail.Type = RFQFieldControlReference.Type AND RFQDetail.SubType = RFQFieldControlReference.SubType", strRFQID, strLineItem));
+
+ //                   SELECT * from RFQDetail CROSS JOIN RFQFieldControlReference  WHERE RFQDetail.RFQID=10000112 AND RFQDetail.Line=1 AND RFQDetail.FieldRef = RFQFieldControlReference.FieldRef AND RFQDetail.Type = RFQFieldControlReference.Type AND RFQDetail.SubType = RFQFieldControlReference.SubType
+
+
+                }
+                else
+                {
+                    if (Convert.ToInt32(strLineItem) == GetNewRowID())
+                    {
+                        gvRFQDetail.DataSource = oRFQDetail.CreateNewRFQDetailRecords(Convert.ToInt32(strRFQID), Convert.ToInt32(strLineItem), (string)Session["RFQType"], (string)Session["RFQSubType"]);
+                   
+                    }
+                    else
+                    {
+                        gvRFQDetail.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail where RFQID={0} AND Line={1}", strRFQID, strLineItem));
+
+                    }
+                }
+    
+                    gvRFQDetail.DataBind();
+
+
+
+                Session["DetailGrid" + Convert.ToString(e.Row.DataItemIndex)] = (GridView)gvRFQDetail;
+
+            }
+        }
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            string item = e.Row.Cells[5].Text;
+            foreach (Button button in e.Row.Cells[5].Controls.OfType<Button>())
+            {
+                if (button.CommandName == "Delete")
+                {
+                    button.Attributes["onclick"] = "if(!confirm('Do you want to delete " + item + "?')){ return false; };";
+                }
+            }
+        }
+
+
+    }
+
+    protected void gvRFQDetails_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        string strFieldRef=null;
+        string strRFQType=null;
+        string strRFQSubType=null;
+        string strValue=null;
+        string strValidation=null; 
+
+        GridView grdView = (GridView)sender; //
+
+        GridViewRow row = (GridViewRow)grdView.NamingContainer;  // It will return the child gridview row in which textBox
+
+
+        int nIndex = row.RowIndex;
+
+        if (e.Row.RowState != DataControlRowState.Edit ) // check for RowState
+        {
+
+            if (e.Row.RowType == DataControlRowType.DataRow) //check for RowType
+            {
+
+                string id = e.Row.Cells[3].Text; // Get the id to be deleted
+
+                //cast the ShowDeleteButton link to linkbutton 
+
+                //                Button lb = (Button)e.Row.Cells[0].FindControl("Delete");
+                //              ((LinkButton)e.Row.Cells[0].Controls[0]).OnClientClick = "return confirm('Do you really want to delete?');";
+
+      
+
+                string strTest = e.Row.Parent.ClientID;
+                 
+
+            }
+
+        }
+        if ((e.Row.RowState  & DataControlRowState.Edit) > 0) // check for RowState need bitwise check
+        {
+
+            strFieldRef = Convert.ToString(DataBinder.Eval(e.Row.DataItem, "FieldRef"));
+            strRFQType = Convert.ToString(DataBinder.Eval(e.Row.DataItem, "Type"));
+            strRFQSubType = Convert.ToString(DataBinder.Eval(e.Row.DataItem, "SubType"));
+            strValue = Convert.ToString(DataBinder.Eval(e.Row.DataItem, "Value"));
+
+
+            
+            RFQFieldControl dbControl = new RFQFieldControl();
+            DataTable dt = dbControl.GetRFQFieldControlRecord(strRFQType, strRFQSubType, strFieldRef);
+
+            strValidation = (string)dt.Rows[0]["Validation"];
+            
+
+            if (!string.IsNullOrEmpty(strFieldRef))
+            {
+                GridCellControls oControl = new GridCellControls();
+                if (string.IsNullOrEmpty(strValue))
+                {
+                    e.Row.Cells[2].Controls.Add(oControl.GetGridCellControlWR(Convert.ToString(nIndex), strRFQType, strRFQSubType, strFieldRef, strValidation));
+                    //                   e.Row.Cells[2].Controls[0].e 
+                }
+                else
+                {
+                    e.Row.Cells[2].Text = "";
+                    e.Row.Cells[2].Controls.Add(oControl.GetGridCellControlWR(Convert.ToString(nIndex), strRFQType, strRFQSubType, strFieldRef, strValue, strValidation));
+                    //                  e.Row.Cells[2].Enabled = true;
+                }
+            }
+         
+ 
+        }
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            
+            string strRequired = Convert.ToString(DataBinder.Eval(e.Row.DataItem, "Required")); // 
+            System.Web.UI.WebControls.Label lblTemp =  e.Row.FindControl("lbFieldRequired") as System.Web.UI.WebControls.Label;
+
+
+           
+
+            if(strRequired.ToUpper()=="Y")
+            {
+                e.Row.Cells[3].ForeColor =System.Drawing.Color.Red; // change cell bg colour
+                lblTemp.ForeColor =System.Drawing.Color.Red;
+                lblTemp.Text = "*"; 
+            }
+            else
+            {
+                e.Row.Cells[3].ForeColor = System.Drawing.Color.Green ; // change cell bg colour
+                lblTemp.ForeColor =System.Drawing.Color.Green;
+                lblTemp.Text = ""; 
+            
+            }
+        
+
+
+            string item = e.Row.Cells[e.Row.Cells.Count-1].Text;
+            foreach (Button button in e.Row.Cells[e.Row.Cells.Count-1].Controls.OfType<Button>())  //always last item on roll
+            {
+                if (button.CommandName == "Delete")
+                {
+                    button.Attributes["onclick"] = "if(!confirm('Do you want to delete " + item + "?')){ return false; };";
+                }
+            }
+        }
+
+
+    }
+
+    protected void gvRFQDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+
+
+
+    }
+
+
+
+
+    private bool UpdateCRMOpportunityRecord()
+    {
+
+        if (string.IsNullOrEmpty((string)Session["OppID"]))
+        {
+
+            return false;
+        }
+        try
+        {
+            var xrm = new XrmServiceContext("Xrm");
+
+
+            Guid OppID = new Guid((string)Session["OppID"]);
+
+
+
+            ColumnSet cols = new ColumnSet(new String[] { "ctype_rfqid","ctype_rfqstatus" });
+
+            Opportunity retrievedOpp = (Opportunity)xrm.Retrieve(Opportunity.EntityLogicalName, OppID, cols);
+
+
+            retrievedOpp.ctype_RFQID = txbRFQNum.Text;
+            if (Convert.ToInt16(cmbStatus.SelectedValue) == 10)
+                retrievedOpp.ctype_RFQStatus = "Created(10)";
+            else if (Convert.ToInt16(cmbStatus.SelectedValue) == 20)
+                retrievedOpp.ctype_RFQStatus = "Submitted(20)";
+            else if (Convert.ToInt16(cmbStatus.SelectedValue) == 30)
+                retrievedOpp.ctype_RFQStatus = "InProcess(30)";
+            else if (Convert.ToInt16(cmbStatus.SelectedValue) == 40)
+                retrievedOpp.ctype_RFQStatus = "Quoted(40)";
+            else if (Convert.ToInt16(cmbStatus.SelectedValue) == 80)
+                retrievedOpp.ctype_RFQStatus = "Completed(80)";
+            else if (Convert.ToInt16(cmbStatus.SelectedValue) == 90)
+                retrievedOpp.ctype_RFQStatus = "Cancelled(90)";
+            else
+                retrievedOpp.ctype_RFQStatus = "Status Unknown";
+
+            xrm.Update(retrievedOpp);
+        }
+        catch (Exception err)
+        {
+            DisplayMsg(string.Format("Error Updating RFQ Status: [{0}]",err.Message));  
+            return false;
+
+        }
+
+
+        return true;
+    }
+
+    private bool CreateNewRFQHeaderRecord()
+    {
+
+        cmbStatus.SelectedValue = "10";  //use value not textvalue
+        txbDateCreated.Text = DateTime.Now.ToString(m_strDateTimeFormat); 
+
+
+        string strOppID = "OpportunityID Not Found";
+
+        if (!string.IsNullOrEmpty((string)Session["OppID"]))
+        {
+            strOppID = (string)Session["OppID"];
+
+        }
+
+        RFQHeaderDB clsRFQHeader = new RFQHeaderDB();
+
+        txbDateSubmitted.Text = null;
+
+
+        //       string strInput = txbRFQNum.Text + ",";
+        string strInput = txbRFQDescription.Text + ",";
+        strInput = strInput + txbDateCreated.Text + ",";
+        strInput = strInput + txbDateSubmitted.Text + ",";
+        strInput = strInput + txbDateQuoted.Text + ",";
+        strInput = strInput + txbDateCreated.Text + ",";  //datelastchange = datecreated
+
+        strInput = strInput + lblCurrencyCRM.Text  + ",";// cmbCurrency.Text + ",";
+
+
+
+
+        strInput = strInput + lblCustomerName.Text + ",";
+        strInput = strInput + (string)Session["AccountName"] + ",";
+        strInput = strInput + strOppID + ",";
+
+        strInput = strInput + txbRequestor.Text + ",";
+        strInput = strInput + cmbStatus.SelectedValue + ",";
+        strInput = strInput + (string)Session["ContactID"] + ",";
+        strInput = strInput + (string)Session["AccountID"] + ",";
+        strInput = strInput + txbDateLastRevised.Text + ",";
+
+        strInput = strInput + txbDateRequested.Text + ",";
+       
+        strInput = strInput + GetUserID(this) + ",";
+        strInput = strInput + "Created RFQ"; 
+
+
+
+        clsRFQHeader.SetInputArray(strInput);
+
+        if (clsRFQHeader.CreateNewRFQHeaderRecord())
+        {
+            Session["RFQID"] = clsRFQHeader.GetIndentityID();
+            Session["RFQMAXLINE"] = 1;
+//            txbRFQNum.Text = Convert.ToString(clsRFQHeader.GetIndentityID());
+
+        }
+
+        UpdateCRMOpportunityRecord();
+        return true;
+    }
+
+    private bool SetHeaderValues(DataTable dt)
+    {
+        string strLinkInfo;
+        try
+        {
+            if (dt.Rows.Count > 0)
+            {
+                    DataRow oRow = dt.Rows[0];
+                    txbRFQDescription.Text = (string)oRow["RFQDescription"];
+                    if (!string.IsNullOrEmpty(oRow["DateCreated"].ToString().Trim()))
+                        txbDateCreated.Text = Convert.ToDateTime(oRow["DateCreated"]).ToString(m_strDateTimeFormat);
+                    if (!string.IsNullOrEmpty(oRow["DateSubmitted"].ToString().Trim()))
+                        txbDateSubmitted.Text = Convert.ToDateTime(oRow["DateSubmitted"]).ToString(m_strDateTimeFormat);
+                    if (!string.IsNullOrEmpty(oRow["DateQuoted"].ToString().Trim()))
+                        txbDateQuoted.Text = Convert.ToDateTime(oRow["DateQuoted"]).ToString(m_strDateTimeFormat);
+
+                    if (!string.IsNullOrEmpty(oRow["DateLastRevised"].ToString().Trim()))
+                        txbDateLastChanged.Text = Convert.ToDateTime(oRow["DateLastRevised"]).ToString(m_strDateTimeFormat);
+
+                    if (!string.IsNullOrEmpty(oRow["DateRevised"].ToString().Trim()))
+                        txbDateLastRevised.Text = Convert.ToDateTime(oRow["DateRevised"]).ToString(m_strDateTimeFormat);
+
+                    if (!string.IsNullOrEmpty(oRow["DateRequired"].ToString().Trim()))
+                        txbDateRequested.Text = Convert.ToDateTime(oRow["DateRequired"]).ToString(m_strDateTimeFormat);
+
+
+
+                    Session["OppID"] = (string)oRow["OpportunityID"];
+
+
+                    // Purge bogus date values
+
+                    if (txbDateCreated.Text.Contains("1900")) txbDateCreated.Text = "";
+                    if (txbDateSubmitted.Text.Contains("1900")) txbDateSubmitted.Text = "";
+                    if (txbDateQuoted.Text.Contains("1900")) txbDateQuoted.Text = "";
+                    if (txbDateLastChanged.Text.Contains("1900")) txbDateLastChanged.Text = "";
+                    if (txbDateLastRevised.Text.Contains("1900")) txbDateLastRevised.Text = "";
+                    if (txbDateRequested.Text.Contains("1900")) txbDateRequested.Text = "";
+
+
+
+                    lblCurrencyCRM.Text   = (string)oRow["Currency"];
+
+
+                    cmbStatus.SelectedValue = (string)oRow["RFQStatus"];
+
+
+
+                    HyperLink lnkCustomer = new HyperLink();
+                    lnkCustomer.Text = (string)oRow["ContactName"];
+                    lnkCustomer.NavigateUrl = "ViewCustomerInfo.aspx";
+ 
+
+
+                    if (!string.IsNullOrEmpty(oRow["ContactName"].ToString().Trim()))
+                         lblCustomerName.Text = (string)oRow["ContactName"];
+
+
+                    if (!string.IsNullOrEmpty(oRow["Requestor"].ToString().Trim()))
+                         txbRequestor.Text = (string)oRow["Requestor"];
+
+                    if (!string.IsNullOrEmpty(oRow["ChangedBy"].ToString().Trim()))
+                        txbChangedBy.Text = (string)oRow["ChangedBy"];
+
+                    if (!string.IsNullOrEmpty(oRow["ReasonForChange"].ToString().Trim()))
+                        txbReasonForChange.Text = (string)oRow["ReasonForChange"];
+
+                    //lblCustomerName.Controls.Add(lnkCustomer);  // need to correct the name
+
+
+                    strLinkInfo = (string)oRow["ContactCRMID"];
+
+                    if (!strLinkInfo.ToUpper().Contains("NOT AVAIL"))
+                    {
+                        BuildHyperLink(lblCustomerName, (string)oRow["ContactCRMID"], "Contact");
+                        Session["ContactID"] = (string)oRow["ContactCRMID"];
+                    }
+
+                    //if (!string.IsNullOrEmpty(oRow["ParentCustomerName"].ToString().Trim()))
+                    //    lblParentCustomerName.Text = (string)oRow["ParentCustomerName"];
+
+                    //BuildHyperLink(lblParentCustomerName, strLinkInfo);
+
+                    strLinkInfo = (string)oRow["ParentCustomerCRMID"];
+                    if (!strLinkInfo.ToUpper().Contains("NOT AVAIL"))
+                    {
+                        lblParentCustomerName.Text =  (string)oRow["ParentCustomerName"];
+                        BuildHyperLink(lblParentCustomerName, (string)oRow["ParentCustomerCRMID"],"Account");
+                        Session["AccountID"] = (string)oRow["ParentCustomerCRMID"];
+                    }
+               
+                 
+      //              UpdateCRMOpportunityRecord();
+                 
+            }
+            
+        }
+        catch (Exception err)
+        {
+
+            DisplayMsg("Error: " + err.Message);
+            return false;
+        }
+        return true;
+    }
+
+    private void BuildHyperLink( System.Web.UI.WebControls.Label lblTemp , string strUIID, string strCRMType)
+    {
+        string strCRMWebSite = GetCRMWebSite();
+        if (string.IsNullOrEmpty(strCRMWebSite))
+        {
+            DisplayMsg("CRM Site Not Defined. Contact System Administrator");
+            return;
+
+        }
+        string strCRMTargetURL = GetCRMTargetSite(strCRMType);
+        if (string.IsNullOrEmpty(strCRMWebSite))
+        {
+            DisplayMsg("CRM Target Site Not Defined. Contact System Administrator");
+            return;
+
+        }
+        HyperLink lnkAddress = new HyperLink();
+       
+        lnkAddress.Text = lblTemp.Text;
+        lnkAddress.Target = "_blank";  //Opens new browser tab
+        lnkAddress.NavigateUrl = string.Format("{0}{1}={2}", strCRMWebSite.Trim(), strCRMTargetURL.Trim(),strUIID.Trim());
+  
+        lblTemp.Controls.Add(lnkAddress);
+
+
+
+    }
+    private string GetCRMTargetSite(string strTargetURL)
+    {
+        string strTargetSite = null;
+
+        if (string.IsNullOrEmpty(strTargetURL))
+            return null; // calling func will display msg
+        try
+        {
+            if (strTargetURL.ToUpper() == "CONTACT")
+            {
+
+                strTargetSite = ConfigurationManager.AppSettings["CRMContactURL"];
+            }
+            else if (strTargetURL.ToUpper() == "ACCOUNT")
+            {
+                strTargetSite = ConfigurationManager.AppSettings["CRMAccountURL"];
+
+            }
+
+            if (string.IsNullOrEmpty(strTargetSite))
+            {
+                return null; // Calling func will display error message
+
+            }
+        }
+        catch (ConfigurationErrorsException err)
+        {
+
+            return null;
+        }
+        return strTargetSite;
+
+    }
+
+
+
+    private string GetCRMWebSite()
+    {
+        string strWebSite = null;
+
+     
+        if (ConfigurationManager.AppSettings["Mode"].ToUpper().Contains("TEST"))
+        {
+            strWebSite = ConfigurationManager.AppSettings["DevCRMHostSite"];
+
+        }
+        else
+            strWebSite = ConfigurationManager.AppSettings["ProdCRMHostSite"];
+
+        if (string.IsNullOrEmpty(strWebSite))
+        {
+            return null; // Calling func will display error message
+
+        }
+        return strWebSite;
+
+    }
+
+    //private void BuildAccountIDHyperLink(System.Web.UI.WebControls.Label lblTemp, string strUIID)
+    //{
+    //    HyperLink lnkAddress = new HyperLink();
+    //    lnkAddress.Text = lblTemp.Text;
+    //    lnkAddress.Target = "_blank";  //Opens new browser tab
+
+    //    lnkAddress.NavigateUrl = string.Format("http://crm01/DEVCRM13/main.aspx?etn=account&pagetype=entityrecord&id={0}",strUIID);
+    //    lnkAddress.ViewStateMode = System.Web.UI.ViewStateMode.Enabled; 
+    //    lblTemp.Controls.Add(lnkAddress);
+    //}
+
+    private bool IsReadyToSubmit(ref string strErrMessage)
+    {
+        if (string.IsNullOrEmpty(txbRFQNum.Text)) return false;
+
+        RFQFieldControl dbControl = new RFQFieldControl();
+        RFQDetail dbDetail = new RFQDetail();
+
+        DataTable dtDetail = dbDetail.GetRFQFieldValues(txbRFQNum.Text);
+
+        foreach (DataRow oRow in dtDetail.Rows)
+        {
+            if (dbControl.IsRFQDetailARequiredField((string)oRow["Type"], (string)oRow["SubType"], (int)oRow["FieldRef"]))
+            {
+                if (string.IsNullOrEmpty((string)oRow["Value"]))
+                {
+                    strErrMessage = string.Format("Missing Data For Line[{0}] Value[{1}]",(int)oRow["Line"],(string)oRow["Description"]); 
+                    return false;
+                }
+            }
+
+        }
+
+
+        return true;
+    }
+
+
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(txbRFQNum.Text)) return;
+        RFQHeaderDB dbHeader = new RFQHeaderDB();
+        string strErrMessage = null;
+        if (!IsReadyToSubmit(ref strErrMessage))
+        {
+            DisplayMsg(strErrMessage);
+            return;
+
+        }
+
+
+        if (cmbStatus.SelectedText.Trim().ToUpper() == "CREATED")
+        {
+            //            cmbStatus.SelectedValue = "10";
+
+
+            txbDateSubmitted.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+            UpdateCRMOpportunityRecord();
+            dbHeader.UpdateSubmitted(txbDateSubmitted.Text, txbRFQNum.Text);
+            btnSendMail();
+            cmbStatus.SelectedValue = "20";
+        }
+        else
+        {
+
+
+            if (!string.IsNullOrEmpty(txbDateQuoted.Text) && (cmbStatus.SelectedText != "Quoted"))
+            {
+                dbHeader.RFQQuoted(txbDateQuoted.Text, txbRFQNum.Text);
+            }
+
+
+
+            if (!string.IsNullOrEmpty(txbDateRequested.Text))
+            {
+
+                dbHeader.UpdateDateRequested(txbDateRequested.Text, txbRFQNum.Text);
+            }
+
+            if (!string.IsNullOrEmpty(txbDateLastRevised.Text))
+            {
+
+                dbHeader.UpdateLastRevised(txbDateLastRevised.Text, txbRFQNum.Text);
+            }
+
+            txbDateLastChanged.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+            dbHeader.UpdateLastChanged(txbDateLastChanged.Text, txbRFQNum.Text);
+
+            txbChangedBy.Text = GetUserID(this);
+
+
+        }
+        Response.Redirect(m_strStartPage + "?RFQID=" + txbRFQNum.Text, true);  
+
+        return;
+
+        
+        cmbStatus.SelectedIndex = 1;
+        ResetForNewOption();
+        //ResetTextBoxes();
+        InitControls();
+        grdRequiredValues.DataSource = null; ;
+        grdRequiredValues.DataBind();
+        
+    }
+    private string BuildMailMessage()
+    {
+        string strStartPage = ConfigurationManager.AppSettings["StartPage"].ToString();
+        string strHostSite = ConfigurationManager.AppSettings["HostSite"].ToString();
+
+        string strMailMessage = strHostSite +"/" + strStartPage + "?RFQID=" + txbRFQNum.Text ;
+        return strMailMessage;
+
+    }
+
+
+    protected void btnSendMail()
+    {
+
+
+
+        string strMessage = @"
+Message generated from within new rfq form.  
+Invoked by 'magic ' button.
+
+";
+        strMessage = BuildMailMessage();
+        string strToEmailAddress = "";
+        string strUserID = GetUserID(this);
+        if (!string.IsNullOrEmpty(strUserID))
+        {
+            strToEmailAddress = strUserID + (string)("@computype.com").Trim();
+
+        }
+        else
+        {
+            strToEmailAddress = "dave.petersen@Computype.com";
+        }
+
+        MailMessage message = new MailMessage("noreply-RFQJammy@computype.com", strToEmailAddress, "Test RFQ", strMessage);
+        message.IsBodyHtml = true;
+
+        //        MailMessage message = new MailMessage("noreply-RFQJammy@computype.com", "chad.villa@computype.com, tom.sylvester@computype.com", "Test RFQ", strMessage);
+
+        //          SmtpClient client = new SmtpClient("EXCHANGE02.computype.com");
+        SmtpClient client = new SmtpClient("devepicorsc972");
+
+        try
+        {
+            client.Timeout = 2500;
+            client.Credentials = CredentialCache.DefaultNetworkCredentials;
+            client.Send(message);
+        }
+        catch (Exception err)
+        {
+
+        }
+
+        /*Pass the credentials if the server requires the client to authenticate before it will send e-mail on the client's behalf.*/
+
+
+
+
+    }
+ 
+     protected void btnClose_Click(object sender, EventArgs e)
+     {
+         
+         RFQInputDetails.ResetControl();
+         mp1.Hide();
+         btnCloseTest.Visible = false; 
+
+     }
+     protected void gvRFQDetails_RowCommand(object sender, GridViewCommandEventArgs e)
+     {
+         int nTest = 5;
+     }
+     protected void gvRFQDetails_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+     {
+         GridView grdView = (GridView)sender; //
+         GridViewRow row = (GridViewRow)grdView.NamingContainer;  // It will return the child gridview row in which textBox
+
+         RFQDetail oRFQDetail = new RFQDetail();
+
+         int nIndex = row.RowIndex;
+         GridView gvRFQDetails = grdRequiredValues.Rows[nIndex].FindControl("gvRFQDetails") as GridView;
+
+
+         gvRFQDetails.EditIndex = -1;
+
+
+
+
+         string strLineID = row.Cells[1].Text;
+
+
+
+   //      gvRFQDetails.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail where RFQID={0} AND Line={1}", txbRFQNum.Text, strLineID));
+
+         gvRFQDetails.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail CROSS JOIN RFQFieldControlReference where RFQID={0} AND Line={1} AND RFQDetail.FieldRef = RFQFieldControlReference.FieldRef AND RFQDetail.Type = RFQFieldControlReference.Type AND RFQDetail.SubType = RFQFieldControlReference.SubType", txbRFQNum.Text, strLineID));
+
+
+         gvRFQDetails.DataBind();
+
+
+
+     }
+     protected void gvRFQDetails_RowUpdating(object sender, GridViewUpdateEventArgs e)
+     {
+         GridView grdView = (GridView)sender; //
+
+          
+         GridViewRow row = (GridViewRow)grdView.NamingContainer;  // It will return the child gridview row in which textBox
+
+         int nParentRow = row.RowIndex;
+
+         RFQDetail oRFQDetail = new RFQDetail();
+
+         
+
+         int nIndex = row.RowIndex;
+         GridView gvRFQDetails = grdRequiredValues.Rows[nIndex].FindControl("gvRFQDetails") as GridView;
+
+
+         string strLineID = grdRequiredValues.Rows[nIndex].Cells[1].Text ; 
+
+
+         System.Web.UI.WebControls.Label lblTemp = grdView.Rows[e.RowIndex].FindControl("lbFieldRef") as System.Web.UI.WebControls.Label;
+          
+          
+         
+          string strFieldRef = lblTemp.Text;
+          DropDownList oBox = gvRFQDetails.Rows[e.RowIndex].Cells[2].FindControl("COMBORow" + Convert.ToString(nParentRow) +"_"+ strFieldRef) as DropDownList;
+          TextBox oBoxT = gvRFQDetails.Rows[e.RowIndex].Cells[2].FindControl("TEXTBOXRow" + Convert.ToString(nParentRow) + "_" + strFieldRef) as TextBox ;
+
+      
+
+          //string strRowValue = oBox.SelectedValue;
+
+          //strRowValue=Request.QueryString["COMBORow" + Convert.ToString(nParentRow) +"_"+ strFieldRef];
+          //strRowValue = Request.Form["COMBORow" + Convert.ToString(nParentRow) +"_"+ strFieldRef]; 
+          //strRowValue = cmbValue.SelectedValue;
+          //int nItem = cmbValue.SelectedIndex;
+          //ListItem item = cmbValue.SelectedItem;
+
+//          DropDownList cmbValue = (DropDownList)gvRFQDetails.Rows[e.RowIndex].FindControl("COMBO"+Convert.ToString(nIndex));
+
+
+          string strRowValue = RecreateControls("COMBORow" + Convert.ToString(nParentRow) + "_" + strFieldRef, "DropDownList");         //gvRFQDetails.Rows[e.RowIndex].Cells[2].Text;
+          if (string.IsNullOrEmpty(strRowValue))
+          {
+              strRowValue = RecreateControls("TEXTBOXRow" + Convert.ToString(nParentRow) + "_" + strFieldRef, "DropDownList");         //gvRFQDetails.Rows[e.RowIndex].Cells[2].Text;
+
+          }
+
+          string strLine = row.Cells[1].Text;
+          string strType = row.Cells[2].Text;
+          string strSubType = row.Cells[3].Text;
+
+          oRFQDetail.UpdateRFQDetailValue(strRowValue, txbRFQNum.Text, strLineID, strType, strSubType, strFieldRef);
+
+          gvRFQDetails.EditIndex = -1;
+
+
+  //        gvRFQDetails.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail where RFQID={0} AND Line={1}", txbRFQNum.Text, strLine));
+          gvRFQDetails.DataSource = oRFQDetail.GetRFQIDDistinctGenericRecord(string.Format("SELECT * from RFQDetail CROSS JOIN RFQFieldControlReference where RFQID={0} AND Line={1} AND RFQDetail.FieldRef = RFQFieldControlReference.FieldRef AND RFQDetail.Type = RFQFieldControlReference.Type AND RFQDetail.SubType = RFQFieldControlReference.SubType", txbRFQNum.Text, strLine));
+
+      
+          gvRFQDetails.DataBind();
+
+
+
+          txbDateLastChanged.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+
+         RFQHeaderDB oRFQHeader = new RFQHeaderDB();
+
+
+
+         if (!oRFQHeader.UpdateLastChanged(txbDateLastChanged.Text, txbRFQNum.Text))
+         {
+             DisplayMsg("Error Updating Last Revised Date");
+             return;
+
+         }
+
+     }
+
+     private string RecreateControls(string ctrlPrefix, string ctrlType)
+     {
+         string ctrlValue = null;
+         string[] ctrls = Request.Form.ToString().Split('&');
+
+         int cnt = FindOccurence(ctrlPrefix);
+
+         if (cnt > 0)
+         {
+
+
+                 for (int i = 0; i < ctrls.Length; i++)
+                 {
+
+                     if (ctrls[i].Contains(ctrlPrefix))
+                     {
+
+                         string ctrlName = ctrls[i].Split('=')[0];
+
+                         ctrlValue = ctrls[i].Split('=')[1];
+
+
+
+                         //Decode the Value
+
+                         ctrlValue = Server.UrlDecode(ctrlValue);
+
+
+
+                 
+
+                     }
+
+                 }
+
+
+         }
+         return ctrlValue; 
+     }
+     private void Test()
+     {
+         WSProgressASP objProgress = new WSProgressASP();
+         ParamArray paramSysTaskProc = new ParamArray(4);
+
+         paramSysTaskProc.AddCharacter(0, "95735", ParamArrayMode.INPUT);
+         paramSysTaskProc.AddCharacter(1, "298382", ParamArrayMode.INPUT);
+         paramSysTaskProc.AddInteger(2, 274869, ParamArrayMode.INPUT);
+
+         paramSysTaskProc.AddTableHandle(3, null, ParamArrayMode.OUTPUT, null);
+
+         objProgress.CallProgressProcedure("GetSequenceLots_NewTest-Pat-Version.p", paramSysTaskProc,"DT"); 
+
+
+     }
+
+     public string GetUserID(Page objPage)
+     {
+
+         if (__DEBUG)
+         {
+             return "Dave.Petersen";
+         }
+         // Routine requires Integrated Windows Security enabled
+         // for the web site.
+
+         string strUserName;
+         strUserName = objPage.User.Identity.Name.ToUpper();
+
+         // Get User Information BEGIN
+         strUserName = strUserName.Replace("COMPUTYPE\\", "");
+
+         return strUserName;
+     }
+
+     public Boolean UserSecurity(string strUserID, string strSecProfile)
+     {
+         WSProgressASP objProgress = new WSProgressASP();
+         ParamArray paramSysTaskProc = new ParamArray(3);
+
+
+         paramSysTaskProc.AddCharacter(0, strUserID, ParamArrayMode.INPUT);
+         paramSysTaskProc.AddCharacter(1, strSecProfile, ParamArrayMode.INPUT);
+
+         paramSysTaskProc.AddCharacter(2, null, ParamArrayMode.OUTPUT);
+
+         objProgress.CallProgressProcedure("RFQUserAccess.p", paramSysTaskProc, "string");
+
+
+
+
+         string strResult = objProgress.ReturnMessage;
+
+         strResult = strResult.ToUpper();
+         if (strResult == "NOACCESS")
+         {
+             return false;
+         }
+         return true;
+
+     }
+
+
+
+
+     private bool AllowUserAccess()
+     {
+         if (Session["AllowedAccess"] != null)
+         {
+             if ((bool)Session["AllowedAccess"])
+             {
+                
+                 return true;
+
+             }
+             return false;
+         }
+
+         RFQSecurityFunctions clsUserSecurity = new RFQSecurityFunctions(this);
+
+        string strAccessList = ConfigurationManager.AppSettings["RFQADGenericAccessList"].ToString();
+
+        if (clsUserSecurity.AllowUserAccess(strAccessList))
+        {
+            Session["AllowedAccess"] = true;
+            Session["UserID"] = clsUserSecurity.GetUserID();
+            Session["GroupType"] = clsUserSecurity.ADGroupType();
+            return true;
+
+        }
+        else
+        {
+            Session["AllowedAccess"] = false;
+        }
+        return false;
+     }
+   
+
+     private void AddRowToDetailGrid()
+     {
+         int nNewRowID;
+         RFQDetail oRFQDetail = new RFQDetail();
+         string strRFQID = txbRFQNum.Text;
+         nNewRowID = oRFQDetail.GetNextMaxLineID(strRFQID); 
+
+         DataTable dtTemp = (DataTable)Session["OriginalData"];
+
+         DataRow oEditRow = dtTemp.NewRow();
+
+         oEditRow["Line"] = (int)Session["RFQMAXLINE"];
+         oEditRow["Type"] = (string)Session["RFQType"];
+         oEditRow["SubType"] = (string)Session["RFQSubType"];
+
+         Session["ADDNEWRFQDETAILS"] = true;
+         SetNewRowIDInfo();
+
+         dtTemp.Rows.Add(oEditRow);
+         dtTemp.AcceptChanges(); 
+         grdRequiredValues.DataSource = dtTemp;
+         grdRequiredValues.DataBind();
+         Session["ADDNEWRFQDETAILS"] = false;
+
+         
+
+     }
+     private void SetNewRowIDInfo()
+     {
+         int nNewRowID;
+         RFQDetail oRFQDetail = new RFQDetail();
+         nNewRowID = oRFQDetail.GetNextMaxLineID(txbRFQNum.Text);
+         Session["NEWROWID"] = nNewRowID;
+     }
+     private int GetNewRowID()
+     {
+         return (int)Session["NEWROWID"];
+
+     }
+
+     protected void grdRequiredValues_RowCreated(object sender, GridViewRowEventArgs e)
+     {
+
+     }
+     protected void cmbValue_SelectedIndexChanged(object sender, EventArgs e)
+     {
+         int nTest = 5;
+     }
+
+     //protected override void LoadViewState(object savedState)
+     //{
+
+     //    //if we can identify the custom view state as defined in the override for SaveViewState
+     //    if (savedState is object[] && ((object[])savedState).Length == 2 && ((object[])savedState)[0] is string[])
+     //    {
+     //        object[] newViewState = (object[])savedState;
+     //        string[] txtValues = (string[])(newViewState[0]);
+     //        if (txtValues.Length > 0)
+     //        {
+     //            //re-load tables
+     //            CreateGridData();
+     //            int ii = 0;
+     //            foreach (GridViewRow oRow in grdRequiredValues.Rows)
+     //            {
+
+     //                GridView grdView = (GridView)oRow.FindControl("gvRFQDetails");
+
+
+     //                //Transfer rows from GridView to table
+     //                for (int i = 0; i < grdView.Rows.Count; i++)
+     //                {
+     //                    if (grdView.Rows[i].RowType == DataControlRowType.DataRow)
+     //                    {
+     //                        for (int j = 0; j < grdView.Rows[i].Cells.Count; j++)
+     //                        {
+     //                            for (int k = 0; k < grdView.Rows[i].Cells[j].Controls.Count; k++)
+     //                            {
+     //                                if (grdView.Rows[i].Cells[j].Controls[k] is System.Web.UI.WebControls.Label)
+     //                                {
+     //                                    ((System.Web.UI.WebControls.Label)grdView.Rows[i].Cells[j].Controls[k]).Text = txtValues[ii++].ToString();
+     //                                }                         //Add your code here..
+     //                                else if (grdView.Rows[i].Cells[j].Controls[k] is TextBox)
+     //                                {
+     //                                    ((TextBox)grdView.Rows[i].Cells[j].Controls[k]).Text = txtValues[ii++].ToString();
+     //                                }
+     //                                else if (grdView.Rows[i].Cells[j].Controls[k] is DropDownList)
+     //                                {
+     //                                    ((DropDownList)grdView.Rows[i].Cells[j].Controls[k]).Text = txtValues[ii++].ToString();
+     //                                }
+     //                                else if (grdView.Rows[i].Cells[j].Controls[k] is ComboBox)
+     //                                {
+     //                                    ((ComboBox)grdView.Rows[i].Cells[j].Controls[k]).SelectedText = txtValues[ii++].ToString();
+     //                                }
+
+     //                            }
+
+     //                        }
+     //                    }
+     //                }
+
+
+
+
+     //                //else if (cell.Controls[0] is ComboBox)
+     //                //{
+     //                //    txtValues.Add(((ComboBox)cell.Controls[0]).SelectedText + "," + cell.ID);
+     //                //}
+
+     //            }
+
+     //        }
+     //        //load the ViewState normally
+     //        base.LoadViewState(newViewState[1]);
+     //    }
+     //    else
+     //    {
+     //        base.LoadViewState(savedState);
+     //    }
+     //}
+
+
+     //protected override object SaveViewState()
+     //{
+
+     //    object[] newViewState = new object[2];
+
+     //    List<string> txtValues = new List<string>();
+
+
+
+     //    foreach (GridViewRow oRow in grdRequiredValues.Rows)
+     //    {
+
+     //        GridView grdView = (GridView)oRow.FindControl("gvRFQDetails");
+
+
+     //        //Transfer rows from GridView to table
+     //        for (int i = 0; i < grdView.Rows.Count; i++)
+     //        {
+     //            if (grdView.Rows[i].RowType == DataControlRowType.DataRow)
+     //            {
+     //                for (int j = 0; j < grdView.Rows[i].Cells.Count; j++)
+     //                {
+     //                    for (int k = 0; k < grdView.Rows[i].Cells[j].Controls.Count; k++)
+     //                    {
+     //                        if (grdView.Rows[i].Cells[j].Controls[k] is System.Web.UI.WebControls.Label)
+     //                        {
+     //                            txtValues.Add(((System.Web.UI.WebControls.Label)grdView.Rows[i].Cells[j].Controls[k]).Text);
+     //                        }                         //Add your code here..
+     //                        else if (grdView.Rows[i].Cells[j].Controls[k] is TextBox)
+     //                        {
+     //                            txtValues.Add(((TextBox)grdView.Rows[i].Cells[j].Controls[k]).Text);
+     //                        }
+     //                        else if (grdView.Rows[i].Cells[j].Controls[k] is DropDownList)
+     //                        {
+     //                            txtValues.Add(((DropDownList)grdView.Rows[i].Cells[j].Controls[k]).SelectedValue);
+     //                        }
+     //                        else if (grdView.Rows[i].Cells[j].Controls[k] is ComboBox)
+     //                        {
+     //                            txtValues.Add(((ComboBox)grdView.Rows[i].Cells[j].Controls[k]).SelectedText);
+     //                        }
+
+     //                    }
+     //                }
+     //            }
+     //        }
+
+
+
+
+     //        //else if (cell.Controls[0] is ComboBox)
+     //        //{
+     //        //    txtValues.Add(((ComboBox)cell.Controls[0]).SelectedText + "," + cell.ID);
+     //        //}
+
+     //    }
+
+     //    newViewState[0] = txtValues.ToArray();
+     //    newViewState[1] = base.SaveViewState();
+     //    return newViewState;
+     //}
+     private void CreateGridData()
+     {
+         RFQDetail oRFQDetail = new RFQDetail();
+
+         //                  grdRequiredValues.DataSourceID = null;
+         grdRequiredValues.DataSource = oRFQDetail.GetRFQIDDistinctDetailRecord((string)Session["RFQID"]);
+         grdRequiredValues.DataBind();
+
+
+     }
+     protected void cmbValue_SelectedIndexChanged1(object sender, EventArgs e)
+     {
+         int nTest = 5;
+     }
+     protected void imgBtn_Click(object sender, ImageClickEventArgs e)
+     {
+         imgBtn.Visible = false;
+         DisplayRFQTypes();
+          
+     }
+     protected void txbDateQuoted_TextChanged(object sender, EventArgs e)
+     {
+         try
+         {
+             DateTime dTest = Convert.ToDateTime(txbDateQuoted.Text);
+         }
+         catch (Exception err)
+         {
+             DisplayMsg("Invalid Quoted Date");
+             return;
+
+         }
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return; 
+
+
+         if (!string.IsNullOrEmpty(txbDateQuoted.Text))
+         {
+             RFQHeaderDB odbHeader = new RFQHeaderDB();
+             odbHeader.RFQQuoted(txbDateQuoted.Text, txbRFQNum.Text);  
+         }
+         UpdateCRMOpportunityRecord();
+     }
+     protected void txbDateLastRevised_TextChanged(object sender, EventArgs e)
+     {
+         try
+         {
+             DateTime dTest = Convert.ToDateTime(txbDateLastRevised.Text);
+         }
+         catch (Exception err)
+         {
+             DisplayMsg("Invalid Date Revised ");
+             return;
+
+         }
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return;
+
+
+         if (!string.IsNullOrEmpty(txbDateLastRevised.Text))
+         {
+             RFQHeaderDB odbHeader = new RFQHeaderDB();
+             
+             odbHeader.UpdateLastRevised(txbDateLastRevised.Text, txbRFQNum.Text);
+         }
+     //    UpdateCRMOpportunityRecord();
+
+     }
+     protected void txbDateRequested_TextChanged(object sender, EventArgs e)
+     {
+         try
+         {
+             DateTime dTest = Convert.ToDateTime(txbDateRequested.Text);
+         }
+         catch (Exception err)
+         {
+             DisplayMsg("Invalid Date Requested ");
+             return;
+
+         }
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return;
+
+
+         if (!string.IsNullOrEmpty(txbDateRequested.Text))
+         {
+             RFQHeaderDB odbHeader = new RFQHeaderDB();
+             odbHeader.UpdateDateRequested(txbDateRequested.Text, txbRFQNum.Text);
+         }
+     }
+     protected void cmbStatus_SelectedIndexChanged(object sender, ComboBoxItemEventArgs e)
+     {
+         RFQHeaderDB oDBHdr = new RFQHeaderDB();
+
+         int nStatus = oDBHdr.GetRFQCurrentStatus(txbRFQNum.Text);
+         if (nStatus == 80)
+         {
+             cmbStatus.SelectedValue = Convert.ToString(nStatus);
+             DisplayMsg("RFQ Is Completed. No Change Is Allowed");
+             return;
+
+         }
+         if (nStatus == 90)
+         {
+             cmbStatus.SelectedValue = Convert.ToString(nStatus);
+             DisplayMsg("RFQ Was Cancelled. No Change Is Allowed");
+             return;
+
+         }
+
+         int nSelectedStatus = Convert.ToInt32(cmbStatus.SelectedValue);
+
+         if (nSelectedStatus < nStatus)
+         {
+             cmbStatus.SelectedValue = Convert.ToString(nStatus);
+             DisplayMsg("Status Must Move Forward");
+           
+             return;
+
+         }
+
+         if (cmbStatus.SelectedValue == "10")
+         {
+
+
+         }
+         else if (cmbStatus.SelectedValue == "20")
+         {
+
+
+         }
+         else if (cmbStatus.SelectedValue == "30")   // In Process
+         {
+             if (!UpdateStatusToInProcess())
+             {
+                 cmbStatus.SelectedValue = Convert.ToString(nStatus);
+                 DisplayMsg("Error Updating Status To In Process");
+                 return;
+
+             }
+
+
+
+         }
+         else if (cmbStatus.SelectedValue == "40")
+         {
+             if (!UpdateDateQuoted())
+             {
+                 cmbStatus.SelectedValue = Convert.ToString(nStatus);
+                 DisplayMsg("Error Updating Status To Quoted");
+                 return;
+
+             }
+
+         }
+         else if (cmbStatus.SelectedValue == "50"  )
+         {
+
+             if (nStatus != 40)
+             {
+                 cmbStatus.SelectedValue = Convert.ToString(nStatus);
+                 DisplayMsg("Error Updating Status To Revised, RFQ Status Must = Quoted");
+                 return;
+
+
+             }
+             if (!UpdateRevised())
+             {
+                 cmbStatus.SelectedValue = Convert.ToString(nStatus);
+                 DisplayMsg("Error Updating Status To Quoted");
+                 return;
+
+             }
+
+         }
+         else if (cmbStatus.SelectedValue == "80")
+         {
+
+             if (!UpdateCompleted())
+             {
+                 cmbStatus.SelectedValue = Convert.ToString(nStatus);
+                 DisplayMsg("Error Updating Status To Completed");
+                 return;
+
+
+             }
+
+         }
+         else if (cmbStatus.SelectedValue == "90")
+         {
+
+             if (!RFQCancelled())
+             {
+                 cmbStatus.SelectedValue = Convert.ToString(nStatus);
+                 DisplayMsg("Error Updating Status To Cancelled");
+                 return;
+
+
+             }
+
+         }
+
+
+         Response.Redirect(m_strStartPage + "?RFQID=" + txbRFQNum.Text, true);
+
+
+     }
+     private bool UpdateDateQuoted()
+     {
+
+    
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return false;
+
+         txbDateQuoted.Text = DateTime.Now.ToString(m_strDateTimeFormat);  
+
+         if (!string.IsNullOrEmpty(txbDateQuoted.Text))
+         {
+             RFQHeaderDB odbHeader = new RFQHeaderDB(GetUserID(this) );
+             odbHeader.RFQQuoted(txbDateQuoted.Text, txbRFQNum.Text);
+         }
+         UpdateCRMOpportunityRecord();
+         return true;
+
+     }
+
+     private bool UpdateCompleted()
+     {
+
+
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return false;
+
+
+         txbDateLastChanged.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+
+         if (!string.IsNullOrEmpty(txbDateLastChanged.Text))
+         {
+             RFQHeaderDB odbHeader = new RFQHeaderDB(GetUserID(this));
+             odbHeader.RFQCompleted(txbDateLastChanged.Text, txbRFQNum.Text);
+             
+
+         }
+         UpdateCRMOpportunityRecord();
+         return true;
+
+     }
+     private bool RFQCancelled()
+     {
+
+
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return false;
+
+
+         txbDateLastChanged.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+
+         if (!string.IsNullOrEmpty(txbDateLastChanged.Text))
+         {
+             RFQHeaderDB odbHeader = new RFQHeaderDB(GetUserID(this));
+             odbHeader.RFQCancelled(txbDateLastChanged.Text, txbRFQNum.Text);
+
+
+         }
+         UpdateCRMOpportunityRecord();
+         return true;
+
+     }
+
+     private bool UpdateStatusToInProcess()
+     {
+
+
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return false;
+         txbDateLastChanged.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+
+
+      
+
+      
+             RFQHeaderDB odbHeader = new RFQHeaderDB(GetUserID(this));
+             odbHeader.RFQInProcess(txbRFQNum.Text);
+
+
+         UpdateCRMOpportunityRecord();
+         return true;
+
+     }
+
+     private bool UpdateRevised()
+     {
+
+
+         if (string.IsNullOrEmpty(txbRFQNum.Text)) return false;
+         txbDateLastChanged.Text = DateTime.Now.ToString(m_strDateTimeFormat);
+
+
+
+
+
+         RFQHeaderDB odbHeader = new RFQHeaderDB(GetUserID(this));
+         odbHeader.UpdateLastRevised(txbDateLastChanged.Text,txbRFQNum.Text);
+
+
+         UpdateCRMOpportunityRecord();
+         return true;
+
+     }
+    
+     private void LockRFQFromChange()
+     {
+         RFQHeaderDB oDBHdr = new RFQHeaderDB();
+
+         int nStatus = oDBHdr.GetRFQCurrentStatus(txbRFQNum.Text);
+         if ((nStatus == 80) || (nStatus == 90))
+         {
+             cmbStatus.Enabled = false;
+             btnSave.Visible = false;
+             btnUpload.Enabled = false;
+             btnSubmit.Enabled = false; 
+
+             grdRequiredValues.Enabled = false;
+
+             txbDateRequested.Enabled = false; 
+             rbList1.Enabled = false;
+
+
+
+         }
+
+
+     }
+
+  
+}

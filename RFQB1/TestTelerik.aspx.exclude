@@ -1,0 +1,913 @@
+﻿<%@ Page Theme="Default" Language="C#" ViewStateEncryptionMode="Never" AutoEventWireup="true" CodeFile="TestTelerik.aspx.cs" Inherits="TestTelerik" %>
+
+<%@ Register Assembly="Telerik.Web.UI" Namespace="Telerik.Web.UI" TagPrefix="telerik" %>
+<%@ Register Assembly="Devarchive.Net" Namespace="Devarchive.Net" TagPrefix="dn" %>
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+
+<%@ Register Assembly="obout_ComboBox" Namespace="Obout.ComboBox" TagPrefix="cc3" %>
+
+<%@ Register Assembly="obout_Grid_NET" Namespace="Obout.Grid" TagPrefix="cc2" %>
+
+<%@ Register TagPrefix="obout" Namespace="Obout.Interface" Assembly="obout_Interface" %>
+
+
+<%@ Register TagPrefix="obout" Namespace="Obout.Interface" Assembly="obout_Interface" %>
+<%@ Register Assembly="FreeTextBox" Namespace="FreeTextBoxControls" TagPrefix="FTB" %>
+
+
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
+<%@ Register TagPrefix="uc1" TagName="RFQInputDetail" Src="~/RFQInputDetail.ascx" %>
+<%@ Reference Control="RFQInputDetail.ascx" %>
+
+<%--<tagCustomerInfo:CustomerInfo runat="server"/>--%>
+<link rel="stylesheet" href="../StyleSheet.css" type="text/css" />
+
+<script type="text/javascript" src="Scripts/jquery-1.8.2.min.js"></script>
+
+<script type="text/javascript" src="Scripts/jquery-ui-1.9.2.js"></script>
+<script type="text/javascript" src="Scripts/jquery-ui-1.9.2.min.js"></script>
+
+<script type="text/javascript" src="Scripts/jquery.qtip.min.js"></script>
+
+<%--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>--%>
+
+<script type="text/javascript">
+    var scrollPos = function () {
+        return $(window).scrollTop();
+    };
+    <a href="TestTelerik.aspx">TestTelerik.aspx</a>
+
+    $(".open-dialog").click(function (e) {
+
+        e.preventDefault();
+
+        // Open the dialog
+
+        $(".basic-dialog").dialog("open");
+
+    });
+
+
+
+
+    function setScroll(val, posId) {
+        posId.value = val.scrollTop;
+    }
+    //only required for w/o <city /><place />ajax</place /></city /> page ScrollWOAjax.
+    function scrollTo(what, posId) {
+        if (what != "0")
+            document.getElementById(what).scrollTop = document.getElementById(posId).value;
+    }
+    function ConfirmOnDelete(item) {
+
+        if (confirm("Are you sure to delete: " + item + "?") == true)
+
+            return true;
+
+        else
+
+            return false;
+
+    }
+    function handleKeyUp(tBox) {
+
+        var frm = document.forms[0];
+        if (tBox.id == "txbRequired1") {
+            var btnSave = document.getElementById("btnSave");
+
+
+
+            if (tBox.value != '') {
+                btnSave.disabled = false;
+            }
+            else
+                btnSave.disabled = true;
+
+        }
+
+    }
+
+    $("[src*=plus]").live("click", function () {
+        $(this).closest("tr").after("<tr><td></td><td colspan = '999'>" + $(this).next().html() + "</td></tr>")
+        $(this).attr("src", "images/minus.png");
+        $(this).next().next().val(1);
+
+    });
+    $("[src*=minus]").live("click", function () {
+        $(this).attr("src", "images/plus.png");
+        $(this).closest("tr").next().remove();
+        $(this).next().next().val("");
+    });
+
+
+    $(function () {
+        $("[id*=IsExpanded]").each(function () {
+            if ($(this).val() == "1") {
+                $(this).closest("tr").after("<tr><td></td><td colspan = '999'>" + $("[id*=pnlRFQDetailSum]", $(this).closest("tr")).html() + "</td></tr>")
+                $("[src*=plus]", $(this).closest("tr")).attr("src", "images/minus.png");
+            }
+        });
+    })
+
+    function handleChange(opt) {
+        if (!confirm('Are you sure?')) {
+            opt.selectedIndex = opt.oldIndex;
+        }
+        else {
+            __doPostBack('cmbStatus', '')
+        }
+    }
+    //var nSelectionedValue;
+    //function CmbStatusHasFocused(sender, eventArgs) {
+       
+    //    nSelectionedValue = sender.value();
+   
+    //}
+
+
+    function AllowSelectionChange(sender, eventArgs) {
+        var nSelectionedValue;
+        
+        
+        
+        //alert(nSelectionedValue.toString() + sender.value());
+
+        if (confirm('Continue?'))
+            return true;
+        else
+            return false;
+    }
+
+
+</script>
+
+
+<style type="text/css">
+    .ob_iCboIC, .ob_iDdlIC
+    {
+        z-index: 100002 !important;
+    }
+</style>
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head runat="server">
+
+    <meta charset="utf-8">
+
+    <title>RFQ Alpha</title>
+
+    <%--  <link rel="stylesheet" href="http://localhost:30379/code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">--%>
+
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <link rel="stylesheet" href="table.css" type="text/css" />
+    <link rel="stylesheet" href="StyleSheet.css" type="text/css" />
+
+    <style type="text/css">
+        .auto-style7
+        {
+            width: 715px;
+            border: none;
+        }
+
+        .removeTableBorders
+        {
+            border: none;
+            outline: none;
+            background-color: #EEEEEE;
+        }
+
+        .removeTableBordersNoBkgColor
+        {
+            border: none;
+            outline: none;
+        }
+
+
+
+        .removeTableBordersRightAlign
+        {
+            border: none;
+            outline: none;
+            text-align: right;
+            width: 150px;
+        }
+
+        .removeTableBordersLbl
+        {
+            width: 200px;
+            border: none;
+            outline: none;
+            background-color: #F0F0F0;
+            background: linear-gradient(to right, #F0F0F0, #FCFCFC); /* Standard syntax */
+            padding: 0px;
+        }
+
+        .lblTableBordersnarrow
+        {
+            width: 200px;
+            outline: none;
+            background-color: #F0F0F0;
+            background: linear-gradient(to right, #F0F0F0, #FCFCFC); /* Standard syntax */
+            padding: 0px;
+            border-style: solid;
+            border-width: thin;
+        }
+
+
+
+
+        .removeTableBordersTXB
+        {
+            width: 200px;
+            border: none;
+            outline: none;
+            background-color: #FCFCFC;
+            top: 0px;
+            left: 0px;
+            padding: 0px;
+        }
+
+
+        .removeTextBoxBordersTXB
+        {
+            border: none;
+            outline: none;
+            background-color: #FCFCFC;
+            top: 0px;
+            left: 0px;
+            padding: 0px;
+        }
+
+
+        .noborders
+        {
+            border: none;
+            outline: none;
+            width: 400px;
+        }
+
+        .modalBackground
+        {
+            background-color: Black;
+            filter: alpha(opacity=90);
+            opacity: 0.8;
+        }
+
+        .modalPopup
+        {
+            background-color: #FFFFFF;
+            border-width: 3px;
+            border-style: solid;
+            border-color: black;
+            padding-top: 10px;
+            padding-left: 10px;
+            width: 1000px;
+            height: 600px;
+        }
+
+        .Grid td
+        {
+            background-color: #A1DCF2;
+            color: black;
+            font-size: 10pt;
+            line-height: 200%;
+        }
+
+        .Grid th
+        {
+            background-color: #3AC0F2;
+            color: White;
+            font-size: 10pt;
+            line-height: 200%;
+        }
+
+        .ChildGrid td
+        {
+            background-color: #eee !important;
+            color: black;
+            font-size: 10pt;
+            line-height: 200%;
+        }
+
+        .ChildGrid th
+        {
+            background-color: #6C6C6C !important;
+            color: White;
+            font-size: 10pt;
+            line-height: 200%;
+        }
+
+        .NotesLabel
+        {
+            vertical-align: text-top;
+        }
+
+        .tableHdr
+        {
+            table-layout: fixed;
+            width: 800px;
+            word-wrap: break-word;
+        }
+
+        .auto-style20
+        {
+            border-style: none;
+            border-color: inherit;
+            border-width: medium;
+            width: 200px;
+            outline: none;
+            background-color: #F0F0F0;
+            /* Standard syntax */ padding: 0px;
+            height: 41px;
+        }
+
+        .auto-style21
+        {
+            border-style: none;
+            border-color: inherit;
+            border-width: medium;
+            width: 100px;
+            outline: none;
+            background-color: #FCFCFC;
+            top: 0px;
+            left: 0px;
+            height: 41px;
+        }
+
+   .rounded_corners
+
+    {
+
+        border: 1px solid #A1DCF2;
+
+        -webkit-border-radius: 8px;
+
+        -moz-border-radius: 8px;
+
+        border-radius: 8px;
+
+        overflow: hidden;
+
+    }
+
+    .rounded_corners td, .rounded_corners th
+
+    {
+
+        border: 1px solid #A1DCF2;
+
+        font-family: Arial;
+
+        font-size: 10pt;
+
+        text-align: center;
+
+    }
+
+    .rounded_corners table table td
+
+    {
+
+        border-style: none;
+
+    }
+    </style>
+    <script type="text/javascript">
+        try {
+            window.onload = function () {
+                Obout.Interface.OboutCore.getLeft = function (element) {
+                    var position = $common.getLocation(element);
+                    return position.x;
+                }
+
+                Obout.Interface.OboutCore.getTop = function (element) {
+                    var position = $common.getLocation(element);
+                    return position.y;
+                }
+            }
+        }
+        catch (Err) {
+
+        };
+
+        //$(function () { //shorthand for $(document).ready(function(){...});
+        //    $("#txbRFQNum").qtip({
+        //        content:
+        //            {
+        //                text: 'Click on the progress bars to see what makes up the percentages!'
+        //            },
+        //        position:
+        //        {
+        //            my: 'top center',
+        //            at: 'bottom center',
+        //            target: $(element)
+        //        },
+        //       show:
+        //        {
+        //            delay: 500,
+        //            event: false,
+        //            ready: true,
+        //            effect: function () {
+        //                $(this).fadeIn();
+        //            }
+        //        },
+        //        hide:
+        //        {
+        //            effect: function () {
+        //                $(this).slideUp();
+        //            }
+        //        },
+        //        events:
+        //        {
+        //            show: function (event, api) {
+        //                setTimeout(function () { api.hide(); }, 3000);
+        //            }
+        //        }
+
+
+
+
+
+        //});
+
+        function setStyle(x) {
+
+            document.getElementById(x.id).style.backgroundColor = "yellow"
+        }
+
+        function ResetStyle(x) {
+            if (ValidateText(x) == false) {
+
+                return false;
+            }
+            document.getElementById(x.id).style.backgroundColor = "white"
+
+        }
+
+
+        function ValidateText(x) {
+            var xx = document.getElementById(x.id).getAttribute("Validate");
+            var regex = xx;
+
+            var re = new RegExp(xx);
+
+            var strToTest = document.getElementById(x.id).value;
+            var strErrMeg = document.getElementById(x.id).getAttribute("ValErrMsg");
+
+            if (strToTest == '') {
+                ResetStyle(x);
+                return;
+            }
+
+
+            if (re.test(strToTest)) {
+                //  alert("success");
+                ResetStyle(x);
+            }
+            else {
+                alert("Error: " + strErrMeg);
+                //
+
+                document.getElementById(x.id).value = "";
+                document.getElementById(x.id).focus();
+
+                ResetStyle(x);
+                //       document.getElementById(x.id).scrollIntoView();
+
+                return false;
+
+            }
+
+
+            //if (ValidateText(x) == false) {
+            //    return false;
+            //}
+        }
+
+
+    </script>
+
+
+</head>
+
+<body class="bodymain">
+    <form runat="server">
+
+        
+
+        <asp:ScriptManager ID="ScriptManager1" runat="server">
+            <Scripts>
+                <asp:ScriptReference Name="jquery" Path="~/Scripts/json2.js" />
+                <asp:ScriptReference Name="jquery" Path="~/Scripts/jquery-1.8.2.js" />
+                <asp:ScriptReference Name="jquery.ui.combined" Path="~/Scripts/jquery-ui-1.9.2.js" />
+                <asp:ScriptReference Name="jquery" Path="~/Scripts/jquery.qtip.min.js" />
+            </Scripts>
+        </asp:ScriptManager>
+        <dn:HoverTooltip runat="server" ID="tooltip1"
+            OffsetX="10"
+            OffsetY="10"
+            DefaultTooltipText="This is default tooltip text"
+            DefaultTooltipTitle="This is default title for the tooltip" SkinID="GoupBoxTooltip">
+            <HtmlTemplate>
+                <div style="border: solid 1px blue; background-color: #D1FFD1; color: black; font-weight: bold">
+                    <b>{0}</b>
+                    <p>
+                        {1}
+                    </p>
+                </div>
+            </HtmlTemplate>
+        </dn:HoverTooltip>
+
+        <dn:HoverTooltip runat="server" ID="ToolTipCmdBtns"
+            OffsetX="10"
+            OffsetY="10"
+            DefaultTooltipText="This is default tooltip text"
+            DefaultTooltipTitle="This is default title for the tooltip" SkinID="GoupBoxTooltipButtons">
+        </dn:HoverTooltip>
+
+        <dn:HoverTooltip runat="server" ID="ToolTipTypes"
+            OffsetX="10"
+            OffsetY="10"
+            DefaultTooltipText="This is default tooltip text"
+            DefaultTooltipTitle="Select Types">
+            <HtmlTemplate>
+                <div style="border: solid 1px blue; background-color: #D1FFD1; color: black; font-weight: bold">
+                    <b>{0}</b>
+                    <p>
+                        {1}
+                    </p>
+                </div>
+            </HtmlTemplate>
+        </dn:HoverTooltip>
+
+
+        <div id="header">
+
+            <div>
+                <table>
+                    <tr>
+                        <td class="noborders">
+                            <asp:Image ID="Image1" runat="server" ImageUrl="~/Images/horiz_ComputypeLogoColor_240_62.jpg" Height="71px" Width="282px" />
+                        </td>
+                        <td class="noborders">
+                            <asp:Label ID="lblTtitle" runat="server" Text="Request For Quote" Font-Size="XX-Large" Font-Bold="True"></asp:Label>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+        <br />
+        <div style="display: none">
+            <cc3:ComboBox ID="ComboBox1" runat="server" Style="display: none"></cc3:ComboBox>
+        </div>
+        <asp:Panel runat="server" ID="Test1" Width="1200px">
+            <div id="RFQHeader" class="content" style="width: 1200px; height: 125px;" runat="server">
+                <table id="Main1" style="border: 0px; border-collapse: collapse" class="tableHdr">
+                    <tr>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblRFQNum" runat="server" Text="RFQ #:" ToolTip="Click To Select An Existing RFQID"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:TextBox ID="txbRFQNum" runat="server" ReadOnly="True" BorderColor="White" BorderStyle="None" CssClass="removeTextBoxBordersTXB" ToolTip="This is  a test.">
+                                    
+                            </asp:TextBox>
+                        </td>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblDatedCreated" runat="server" Text="Created:"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:TextBox ID="txbDateCreated" runat="server" Width="150px" BorderColor="White" BorderStyle="None" ReadOnly="True" CssClass="removeTableBordersTXB"></asp:TextBox>
+                        </td>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblCustomer" runat="server" Text="Contact:"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:Label ID="lblCustomerName" runat="server" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB"></asp:Label>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblRequestor" runat="server" Text="Requestor:"></asp:Label>
+
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:TextBox ID="txbRequestor" runat="server" ReadOnly="True" BorderColor="White" BorderStyle="None" CssClass="removeTextBoxBordersTXB"></asp:TextBox>
+                        </td>
+                        <td class="removeTableBordersLbl">
+
+                            <asp:Label ID="lblDateSubMitted" runat="server" Text="Submitted:" Width="150px"></asp:Label>
+
+                        </td>
+                        <td class="removeTableBordersTXB">
+
+                            <asp:TextBox ID="txbDateSubmitted" runat="server" AutoPostBack="true" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB" ReadOnly="True" Width="150px"></asp:TextBox>
+
+                        </td>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblParentCustomer" runat="server" Text="Customer:" Width="150px"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:Label ID="lblParentCustomerName" runat="server" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB" Width="200px"></asp:Label>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblStatus" runat="server" Text="Status:"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <cc3:ComboBox ID="cmbStatus" runat="server" DataSourceID="sqldsRFQDefinitions" DataTextField="RFQStatusShortDesc" DataValueField="RFQStatID" AutoPostBack="True" OnSelectedIndexChanged="cmbStatus_SelectedIndexChanged" style="top: 0px; left: 0px">
+                                <ClientSideEvents OnSelectedIndexChanged="AllowSelectionChange" />
+                            </cc3:ComboBox>
+                        </td>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblDateRequested" runat="server" Text="Required:" Width="150px"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+
+                            <asp:TextBox ID="txbDateRequested" runat="server" BorderColor="White" BorderStyle="Inset" CssClass="lblTableBordersnarrow" ReadOnly="false" Width="150px" AutoPostBack="True" OnTextChanged="txbDateRequested_TextChanged"></asp:TextBox>
+                        </td>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblCurrency" runat="server" Text="Currency:"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+
+                            <asp:Label ID="lblCurrencyCRM" runat="server" Text=""></asp:Label>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblRFQDescription" runat="server" Text="Description:"></asp:Label>
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:TextBox ID="txbRFQDescription" runat="server" BorderColor="White" BorderStyle="None" CssClass="removeTextBoxBordersTXB" ReadOnly="True"></asp:TextBox>
+
+                        </td>
+                        <td class="removeTableBordersLbl">
+                            <asp:Label ID="lblDateQuoted" runat="server" Text="Quoted:" Width="150px"></asp:Label>
+                            &nbsp;</td>
+                        <td class="removeTableBordersTXB">
+
+                            <asp:TextBox ID="txbDateQuoted" runat="server" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB" ReadOnly="true" Width="150px" AutoPostBack="false"></asp:TextBox>
+                        </td>
+                        <td class="removeTableBordersLbl"></td>
+                        <td class="removeTableBordersTXB"></td>
+
+                    </tr>
+                    <tr>
+                        <td class="removeTableBordersLbl"></td>
+                        <td class="removeTableBordersTXB"></td>
+                        <td class="removeTableBordersLbl">
+
+                            <asp:Label ID="lblDateLastRevised" runat="server" Text="Last Revised:"></asp:Label>
+
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:TextBox ID="txbDateLastRevised" runat="server" BorderColor="White" BorderStyle="None" ReadOnly="FALSE" AutoPostBack="True" Width="150px" CssClass="removeTableBordersTXB" OnTextChanged="txbDateLastRevised_TextChanged"></asp:TextBox>
+
+                        </td>
+                        <td class="removeTableBordersLbl"></td>
+                        <td class="removeTableBordersTXB"></td>
+
+                    </tr>
+                    <tr>
+                        <td class="removeTableBordersLbl">
+
+                            <asp:Label ID="Label1" runat="server" Text="Last Changed:"></asp:Label>
+
+                        </td>
+                        <td class="removeTableBordersTXB">
+
+                            <asp:TextBox ID="txbDateLastChanged" runat="server" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB" ReadOnly="True" Width="150px"></asp:TextBox>
+
+                        </td>
+                        <td class="removeTableBordersLbl">
+
+                            <asp:Label ID="lblWhoChanged" runat="server" Text="By:"></asp:Label>
+
+                        </td>
+                        <td class="removeTableBordersTXB">
+                            <asp:TextBox ID="txbChangedBy" runat="server" AutoPostBack="True" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB" OnTextChanged="txbDateLastRevised_TextChanged" ReadOnly="FALSE" Width="150px"></asp:TextBox>
+
+                        </td>
+                        <td class="removeTableBordersLbl">
+
+                            <asp:Label ID="lblWhoChanged0" runat="server" Text="Changed Item:"></asp:Label>
+
+                        </td>
+                        <td class="removeTableBordersTXB">
+
+                            <asp:TextBox ID="txbReasonForChange" runat="server" AutoPostBack="True" BorderColor="White" BorderStyle="None" CssClass="removeTableBordersTXB" OnTextChanged="txbDateLastRevised_TextChanged" ReadOnly="FALSE" Width="170px"></asp:TextBox>
+                        </td>
+
+                    </tr>
+
+                </table>
+            </div>
+
+            <asp:Panel ID="pnlMain" runat="server" ScrollBars="Vertical" Width="100%">
+                <%--      <div id="divdatagrid1" style="width: 100%; overflow:scroll;
+    height: 100px;" onscroll='javascript:setScroll(this, <% =scrollPos.ClientID %> );'>--%>
+                <%--               <cc2:Grid ID="grdMasterRFQDetails" runat="server" OnRowDataBound="grdMasterRFQDetails_RowDataBound">
+                    <MasterDetailSettings LoadingMode="OnLoad" />
+                    <Columns>
+                         <cc2:Column ItemStyle-Width="50px" DataField="Line" HeaderText="Line" />
+                         <cc2:Column ItemStyle-Width="150px" DataField="Type" HeaderText="Type" />
+                         <cc2:Column ItemStyle-Width="150px" DataField="SubType" HeaderText="SubType" />
+
+                    </Columns>
+                    <DetailGrids>
+                        <cc2:DetailGrid runat="server" ID="grdDetailRFQDetail">
+                            <Columns>
+                                <cc2:Column DataField="FieldRef" HeaderText="FieldRef"></cc2:Column> 
+                            </Columns> 
+                        </cc2:DetailGrid> 
+                    </DetailGrids> 
+
+                </cc2:Grid>--%>
+                <%--               <telerik:RadComboBox ID="RadComboBox1" runat="server"></telerik:RadComboBox>--%>
+                <div id="rfqdetail" class="rounded_corners" runat="server">
+                <asp:GridView ID="grdRequiredValues" EnableViewState="true" AutoGenerateColumns="false" runat="server" CssClass="Grid" OnRowCreated="grdRequiredValues_RowCreated" OnRowDeleting="grdRequiredValues_RowDeleting" OnRowDataBound="grdRequiredValues_RowDataBound" OnRowEditing="grdRequiredValues_RowEditing">
+                    <Columns>
+                        <asp:TemplateField>
+                            <ItemTemplate>
+                                <img alt="" style="cursor: pointer" src="images/plus.png" />
+                                <asp:Panel ID="pnlRFQDetailSum" runat="server" Style="display: none">
+                                    <asp:GridView ID="gvRFQDetails" EnableViewState="true" runat="server" AutoGenerateColumns="false" CssClass="ChildGrid" OnRowDeleting="gvRFQDetails_RowDeleting" OnRowCancelingEdit="gvRFQDetails_RowCancelingEdit" OnRowCommand="gvRFQDetails_RowCommand" OnRowDataBound="gvRFQDetails_RowDataBound" OnRowEditing="gvRFQDetails_RowEditing" OnRowUpdating="gvRFQDetails_RowUpdating">
+                                        <Columns>
+                                            <asp:TemplateField HeaderText="FieldRef" Visible="false">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="lbFieldRef" runat="server" Text='<%#Bind("FieldRef")%>'></asp:Label>
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <asp:Label ID="lbFieldRef" runat="server" Text='<%#Bind("FieldRef")%>' Visible="false"></asp:Label>
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="Description" ItemStyle-CssClass="NotesLabel">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="lbDescription" runat="server" Text='<%#Bind("Description")%>' CssClass="NotesLabel"></asp:Label>
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <asp:Label ID="lbDescription" runat="server" Text='<%#Bind("Description")%>' CssClass="NotesLabel"></asp:Label>
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="Value" ItemStyle-HorizontalAlign="center">
+                                                <ItemTemplate>
+                                                    <%--                                                    <Columns> 
+                                                  <asp:BoundField ItemStyle-Width="150px" DataField="Value" HeaderText="Value" />
+                                                        </Columns>--%>
+                                                    <asp:Label ID="lblValue" runat="server" Text='<%#Eval("Value")%>'></asp:Label>
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <%--                                                    <cc3:ComboBox   ID="ComboBox2" runat="server" SelectedValue='<%#DataBinder.Eval(Container.DataItem,"Value") %>'></cc3:ComboBox>--%>
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="Req." HeaderStyle-Width="5px" ItemStyle-Width="15px" ItemStyle-HorizontalAlign="center">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="lbFieldRequired" runat="server" Text='<%#Bind("Required")%>' ForeColor="Red" Width="25px" Font-Size="Large"></asp:Label>
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <asp:Label ID="lbFieldRequired" runat="server" Text='<%#Bind("Required")%>' ForeColor="Red" Width="25px" Font-Size="Large"></asp:Label>
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="Allowed Values">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="lbFieldRequiredValue" runat="server" Text='<%#Bind("ValidationErrMessage")%>' Font-Size="Small"></asp:Label>
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <asp:Label ID="lbFieldRequiredValue" runat="server" Text='<%#Bind("ValidationErrMessage")%>' Font-Size="Small"></asp:Label>
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>
+
+                                            <asp:TemplateField ItemStyle-HorizontalAlign="Center" ItemStyle-Width="10px" HeaderStyle-Width="15px">
+                                                <ItemTemplate>
+                                                    <asp:Button ID="btnEdit" CommandName="Edit" Text="Edit" runat="server" />
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <asp:Button ID="btnEdit" CommandName="Update" Text="Update" runat="server" />
+                                                    <asp:Button ID="Button1" CommandName="Cancel" Text="Cancel" runat="server" />
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>
+                                            <%--                                         <asp:TemplateField>
+                                                <ItemTemplate>
+                                                    <asp:Button ButtonType="Button" CommandName="Delete" Text="Delete" runat="server" visible="false"/>
+                                                </ItemTemplate>
+                                                <EditItemTemplate>
+                                                    <asp:Button ButtonType="Button" CommandName="Cancel" Text="Cancel" runat="server" />
+                                                </EditItemTemplate>
+                                            </asp:TemplateField>--%>
+                                        </Columns>
+                                    </asp:GridView>
+                                </asp:Panel>
+                                <asp:HiddenField ID="IsExpanded" runat="server" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:BoundField ItemStyle-Width="50px" DataField="Line" HeaderText="Line" />
+                        <asp:BoundField ItemStyle-Width="150px" DataField="Type" HeaderText="Type" />
+                        <asp:BoundField ItemStyle-Width="150px" DataField="SubType" HeaderText="SubType" />
+                        <asp:ButtonField ButtonType="Button" CommandName="Edit" Text="Edit" runat="server" Visible="false" />
+                        <asp:ButtonField ButtonType="Button" CommandName="Delete" Text="Delete" runat="server" />
+
+                    </Columns>
+
+                </asp:GridView>
+                    </div>
+                <br />
+                <asp:Panel ID="pnlSelects" runat="server">
+                    <div style="left: 0px">
+                        <br />
+                        <br />
+                        <table class="content3">
+                            <tr>
+                                <td class="removeTableBordersRightAlign">
+                                    <asp:Label ID="lblNewMediaType" runat="server" Text="New Media Type:   "></asp:Label>
+                                </td>
+                                <td style="width: 5%" class="removeTableBordersRightAlign">
+                                    <asp:ImageButton ID="imgBtn" runat="server" ImageUrl="~/Images/breadcrumb.png" OnClick="imgBtn_Click" />
+                                </td>
+                                <td class="auto-style7">
+                                    <asp:RadioButtonList ID="rbList1" RepeatDirection="Horizontal" runat="server" AutoPostBack="True" OnSelectedIndexChanged="rbList1_SelectedIndexChanged" Width="712px" DataSourceID="sqldsRFQTypes" DataTextField="Type" DataValueField="Type">
+                                        <asp:ListItem>Labels</asp:ListItem>
+                                        <asp:ListItem>Printers</asp:ListItem>
+                                        <asp:ListItem>Scanners</asp:ListItem>
+                                        <asp:ListItem>Service</asp:ListItem>
+                                    </asp:RadioButtonList>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </asp:Panel>
+
+
+
+                <asp:SqlDataSource ID="sqldsSellingUnit" runat="server" ConnectionString="<%$ ConnectionStrings:RFQConnectionString %>" SelectCommand="SELECT * FROM [SellingUnits]"></asp:SqlDataSource>
+
+                <asp:SqlDataSource ID="sqldsRFQDefinitions" runat="server" ConnectionString="<%$ ConnectionStrings:RFQConnectionString %>" SelectCommand="SELECT * FROM [RFQStatus]"></asp:SqlDataSource>
+
+                <asp:SqlDataSource ID="sqldsRFQTypes" runat="server" ConnectionString="<%$ ConnectionStrings:RFQConnectionString %>" SelectCommand="SELECT DISTINCT [Type] FROM [RFQTypes]"></asp:SqlDataSource>
+
+
+
+                <div style="position: relative">
+                    <br />
+                    <br />
+                    <table style="border: none; border-collapse: collapse; outline: none; width: 75%" class="removeTableBordersNoBkgColor">
+                        <tr>
+                            <td class="removeTableBordersNoBkgColor">
+                                <asp:Button ID="btnSave" runat="server" Text="Save" Height="58px" Width="164px"  Visible="false" />
+                            </td>
+                            <td class="removeTableBordersNoBkgColor">
+                                <asp:Button ID="btnSubmit" runat="server" Text="Submit" Height="58px" Width="164px" Enabled="true" OnClick="btnSubmit_Click" Visible="false" /></td>
+                            <td class="removeTableBordersNoBkgColor">
+                                <asp:Button ID="btnUpload" runat="server" Text="Attach/View File(s)" Width="164px" OnClick="btnUpload_Click" Height="58px" />
+                            </td>
+
+                        </tr>
+                    </table>
+                </div>
+            </asp:Panel>
+            <juice:Datepicker runat="server" ID="dRequestedDate" TargetControlID="txbDateRequested" MinDate="0" AutoPostBack="true" OnOnSelect="txbDateRequested_TextChanged" />
+            <!-- ModalPopupExtender -->
+            <asp:Button ID="btnEditHidden" runat="server" Text="" hidden="true" Visible="true" Height="0px" Width="0px" BackColor="White" BorderWidth="0" />
+            <cc1:ModalPopupExtender ID="mp1" runat="server" TargetControlID="btnEditHidden"
+                CancelControlID="" BackgroundCssClass="modalBackground" PopupControlID="Panel1">
+            </cc1:ModalPopupExtender>
+
+
+
+            <asp:Panel ID="Panel1" runat="server" CssClass="modalPopup" align="center" Style="display: none">
+                <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
+                    <ContentTemplate>
+                        <div class="content3" style="width: 100%; height: 150px;">
+                            <uc1:RFQInputDetail ID="RFQInputDetails" runat="server" />
+                        </div>
+
+                        <div style="position: absolute; top: 550px; left: 45%;">
+                            <asp:Button ID="btnCloseTest" Text="Close" OnClick="btnClose_Click" runat="server" Visible="false" />
+
+                        </div>
+
+
+                    </ContentTemplate>
+                </asp:UpdatePanel>
+
+            </asp:Panel>
+
+        </asp:Panel>
+
+
+        <%--                                                    <Columns> 
+                                                  <asp:BoundField ItemStyle-Width="150px" DataField="Value" HeaderText="Value" />
+                                                        </Columns>--%>
+    </form>
+
+</body>
+
+</html>
