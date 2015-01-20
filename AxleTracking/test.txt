@@ -1,0 +1,53 @@
+ Volume in drive C has no label.
+ Volume Serial Number is B426-ACE1
+
+ Directory of C:\Inetpub\wwwroot\AxleTracking
+
+12/20/2006  04:09 PM    <DIR>          .
+12/20/2006  04:09 PM    <DIR>          ..
+12/15/2006  12:44 PM             9,321 Admin.aspx
+12/13/2006  04:41 PM               837 Admin.aspx.cs
+12/20/2006  10:17 AM    <DIR>          App_Code
+12/19/2006  05:34 PM    <DIR>          App_Data
+12/13/2006  04:28 PM             4,345 BearingDemount.aspx
+12/13/2006  05:52 PM             9,231 BearingDemount.aspx.cs
+12/15/2006  11:25 AM             4,749 BearingMount.aspx
+12/13/2006  04:38 PM            10,219 BearingMount.aspx.cs
+05/16/2002  11:22 PM             1,049 CreateLogFiles.cs
+12/11/2006  10:08 AM                68 Global.asax
+12/17/2006  12:03 AM             3,854 Login.aspx
+12/20/2006  09:18 AM             8,093 Login.aspx.cs
+12/11/2006  10:08 AM             2,890 logo.jpg
+12/19/2006  05:24 PM    <DIR>          Logs
+12/19/2006  06:33 PM             1,698 LogTrace.aspx
+12/19/2006  06:28 PM               501 LogTrace.aspx.cs
+12/13/2006  04:31 PM             3,405 LooseAxles.aspx
+12/13/2006  04:38 PM             5,414 LooseAxles.aspx.cs
+12/11/2006  10:08 AM             4,716 Main.aspx
+12/11/2006  10:41 AM             6,362 Main.aspx.cs
+12/11/2006  10:08 AM            34,909 NewMastersqlinsert.sql
+12/06/2006  10:51 AM             4,146 NewRFDB.sql
+12/20/2006  09:37 AM            39,188 New_BuildDB.sql
+12/14/2006  10:21 AM             6,648 ReceiveAxle.aspx
+12/20/2006  10:56 AM            17,327 ReceiveAxle.aspx.cs
+12/20/2006  09:26 AM             6,036 ReceiveBearing.aspx
+12/20/2006  11:01 AM             5,324 ReceiveBearing.aspx.cs
+12/14/2006  10:06 AM             4,146 ReceiveLoad.aspx
+12/14/2006  10:04 AM             5,224 ReceiveLoad.aspx.cs
+12/19/2006  11:39 AM             4,985 ReceiveWheel.aspx
+12/20/2006  10:56 AM             4,530 ReceiveWheel.aspx.cs
+12/20/2006  04:09 PM                 0 test.txt
+12/19/2006  10:04 AM             4,108 TurnTread.aspx
+12/15/2006  12:55 PM            12,613 TurnTread.aspx.cs
+12/19/2006  10:13 AM             1,486 web.config
+12/06/2006  06:20 PM             1,980 web.configxxx
+12/11/2006  10:26 AM             1,674 web.configxxxx
+12/11/2006  10:26 AM             1,674 web.configxxxxx
+12/13/2006  06:22 PM             4,655 WheelDemount.aspx
+12/13/2006  05:55 PM             8,918 WheelDemount.aspx.cs
+12/10/2006  07:43 PM             3,620 WheelLathe.aspx
+12/10/2006  07:43 PM               703 WheelLathe.aspx.cs
+12/14/2006  12:13 PM             5,628 WheelMount.aspx
+12/15/2006  12:18 PM            13,166 WheelMount.aspx.cs
+              41 File(s)        269,440 bytes
+               5 Dir(s)  109,552,369,664 bytes free

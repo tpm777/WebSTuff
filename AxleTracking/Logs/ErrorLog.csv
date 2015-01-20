@@ -1,0 +1,64 @@
+12/22/2006 6:55:23 PM ==> Error: Incorrect syntax near 'Bearing'.
+12/22/2006 6:56:54 PM ==> Error: Incorrect syntax near 'Bearing'.
+12/22/2006 6:57:54 PM ==> Error: Incorrect syntax near 'Bearing'.
+12/23/2006 12:18:23 AM ==> Error: Incorrect syntax near 'Bearing'.
+12/23/2006 12:21:02 AM ==> Error: Incorrect syntax near 'Bearing'.
+12/23/2006 12:21:22 AM ==> Error: Incorrect syntax near 'Bearing'.
+12/23/2006 12:24:00 AM ==> Error: Incorrect syntax near 'Wheel'.
+12/23/2006 12:24:43 AM ==> Error: Incorrect syntax near 'Wheel'.
+12/23/2006 12:26:40 AM ==> Error: Incorrect syntax near 'Wheel'.
+12/23/2006 12:27:11 AM ==> Error: Incorrect syntax near 'Wheel'.
+12/23/2006 1:01:41 AM ==> Error: Incorrect syntax near 'Wheel'.
+12/24/2006 11:17:13 AM ==> Error: Incorrect syntax near 'Wheel'.
+12/24/2006 11:29:41 AM ==> Error: Incorrect syntax near the keyword 'SELECT'.
+12/24/2006 11:31:30 AM ==> Error: Incorrect syntax near the keyword 'SELECT'.
+12/24/2006 11:33:05 AM ==> Error: Incorrect syntax near the keyword 'SELECT'.
+12/24/2006 11:39:08 AM ==> Error: Incorrect syntax near 'Business'.
+12/24/2006 11:39:08 AM ==> Error: Incorrect syntax near the keyword 'WHERE'.
+12/24/2006 11:40:39 AM ==> Error: There are fewer columns in the INSERT statement than values specified in the VALUES clause. The number of values in the VALUES clause must match the number of columns specified in the INSERT statement.
+12/24/2006 11:45:19 AM ==> Error: There are fewer columns in the INSERT statement than values specified in the VALUES clause. The number of values in the VALUES clause must match the number of columns specified in the INSERT statement.
+12/24/2006 11:47:52 AM ==> Error: There are fewer columns in the INSERT statement than values specified in the VALUES clause. The number of values in the VALUES clause must match the number of columns specified in the INSERT statement.
+12/24/2006 11:49:59 AM ==> Error: Incorrect syntax near 'Status'.
+12/24/2006 11:55:57 AM ==> Error: There are fewer columns in the INSERT statement than values specified in the VALUES clause. The number of values in the VALUES clause must match the number of columns specified in the INSERT statement.
+12/24/2006 8:45:49 PM ==> Error: Incorrect syntax near 'Wheel'.
+12/24/2006 8:46:24 PM ==> Error: Incorrect syntax near 'Wheel'.
+12/24/2006 8:48:54 PM ==> Error: Incorrect syntax near 'Wheel'.
+12/27/2006 8:26:59 PM ==> Error: Incorrect syntax near 'OBLoadID'.
+12/28/2006 2:07:05 PM ==> Error: Incorrect syntax near '1'.
+12/28/2006 2:07:35 PM ==> Error: Incorrect syntax near '1'.
+12/28/2006 2:07:35 PM ==> Error: Incorrect syntax near '2'.
+12/28/2006 2:07:35 PM ==> Error: Incorrect syntax near '1'.
+12/28/2006 2:07:35 PM ==> Error: Incorrect syntax near '1'.
+12/28/2006 2:09:57 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 2:12:20 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 2:15:31 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 2:17:06 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 2:19:27 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 2:23:37 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 2:24:38 PM ==> Error: Incorrect syntax near the keyword 'VALUES'.
+12/28/2006 2:26:58 PM ==> Error: Incorrect syntax near the keyword 'VALUES'.
+12/28/2006 2:30:01 PM ==> Error: String or binary data would be truncated.
+The statement has been terminated.
+12/28/2006 7:09:13 PM ==> Error: Incorrect syntax near 'System'.
+12/28/2006 7:10:20 PM ==> Error: Incorrect syntax near 'System'.
+1/3/2007 7:32:21 PM ==> Error: Incorrect syntax near the keyword 'WHERE'.
+1/3/2007 7:32:50 PM ==> Error: Incorrect syntax near the keyword 'WHERE'.
+1/3/2007 7:32:59 PM ==> Error: Incorrect syntax near the keyword 'WHERE'.
+1/3/2007 7:35:02 PM ==> Error: Incorrect syntax near the keyword 'WHERE'.
+1/3/2007 7:37:15 PM ==> Error: Incorrect syntax near the keyword 'AND'.
+1/3/2007 7:38:58 PM ==> Error: Incorrect syntax near the keyword 'AND'.
+1/3/2007 7:56:20 PM ==> Error: Incorrect syntax near 'Wheel'.
+1/3/2007 7:58:18 PM ==> Error: Incorrect syntax near 'Wheel'.
+1/3/2007 8:00:52 PM ==> Error: Incorrect syntax near 'Wheel'.
+1/6/2007 7:18:53 PM ==> Error: Incorrect syntax near the keyword 'AND'.
+1/6/2007 8:04:56 PM ==> Error: Incorrect syntax near the keyword 'AND'.
+1/6/2007 8:05:46 PM ==> Error: Incorrect syntax near the keyword 'AND'.
+1/7/2007 10:27:11 PM ==> Error: Incorrect syntax near 'Wheel'.
+1/7/2007 10:27:28 PM ==> Error: Incorrect syntax near 'Wheel'.
+1/7/2007 10:27:45 PM ==> Error: Incorrect syntax near 'Wheel'.

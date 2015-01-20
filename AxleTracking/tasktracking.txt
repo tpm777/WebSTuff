@@ -1,0 +1,107 @@
+Dec 27th 7:30-9:59  2.5 hrs
+
+Outbound Screens/C# logic
+
+Dec 28th 12:00-2:00 AM  2.0 hrs
+
+evaluating different dropdownlist boxes
+that supported both autocomplete and
+db binding.
+
+- Vortex.Web.UI.WebControls
+- Bestcomy.Web.UI.WebControls.dll
+- google's
+- MetaBuilders.WebControls.ComboBox.dll
+- r.a.d combo-box
+- M$ Ajax autocomplete extenders
+
+
+Dec 29th 12:30- 3:00 PM   2.5 hrs
+
+- created OBAxle table
+- add calls to determine maxOB qty, current qty
+  assigned to a obloadid
+- worked on postbacks for obound screens
+- optimize global code cache
+
+Dec 29th 6:30- 7:35 PM  1.1  hrs
+
+- added code to purge WD table after Outbound Operation
+- added code to purge axle table of tag id
+- debug code calculating max and inst. qty.
+- generate new SQL script file
+
+Dec 29th 11:00 AM- 12:30 AM  1.5  hrs
+
+- developing unit tests
+- debuging bearing demount
+
+Dec 30th 6:50 AM- 8:50 AM  2.0  hrs
+- started user manual
+- begin constructing unit tests using VSTS
+- added autocomplete combo to receiveaxle, receivewheel
+
+Dec 30th 2:00 AM- 5:00 3 hrs
+- developed global error message handler
+- fine tuned login
+- removed autopostback from receivewheel so
+- error messages could be generated and
+- aspx forms would not advanced.
+
+
+Dec 30th 7:00 PM- 12:00 5 hrs
+
+- added validation routine for textbox'es
+- required to prevent data entry errors
+- 
+
+Dec 31th 7:00 PM- 11:00 4 hrs
+
+- tested login with different user id's
+- debugged receive axles, wheels, bearings
+- replaced dropdownlist from above to autocomplete combo
+
+
+Jan 1th 9:00 PM- 1:30 AM (01-02-07)  4.5 hrs
+
+- worked on user manual 
+- made sure customer code was stored instead of name in axle table
+- replaced dropdown with combo kbd, kmd
+- 
+
+Jan 2th 3:00 AM- 4:00 AM (01-02-07)  1 hrs
+
+- worked on user manual 
+- worked on test plan XP style
+- 
+
+
+Jan 2th 7:00 AM- 12:00 AM (02-02-07)  5 hrs
+
+- worked on user manual 
+- worked on receive axle....postback and
+select_item commands firing together causing
+confused software states.
+- added error message dlg code
+
+Jan 3th 3:00 PM- 8:15 PM  5.25 hrs
+
+- user manual
+
+Jan 3th 11:00 PM- 11:45 PM  .75 hrs
+ - added admin functions, add/edit/update users inbound load id's
+
+
+Jan 4th 9:00 PM- 12:00 AM  3 hrs
+ - added admin functions
+   add/edit/update users inbound load id's for receive axles
+- added global system table for site configuration
+
+
+Jan 5th 9:00 PM- 12:00 AM  3 hrs
+ - add scrap logic code for bdm,wdm and axle inspection
+- worked on manual
+
+
+Note password bug for textbox...autocomplete is listing 
+previously entered password. 

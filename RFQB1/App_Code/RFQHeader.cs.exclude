@@ -1,0 +1,239 @@
+﻿using System;
+using System.Configuration;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Data;
+using System.Data.SqlClient;
+
+/// <summary>
+/// Summary description for RFQHeaderDB
+/// </summary>
+/// 
+namespace RFQDBFunctions
+{
+    public class RFQHeaderDB
+    {
+
+        const int RFQDESCRIPTION = 0;
+        const int DATECREATED = 1;
+        const int DATESUBMITTED = 2;
+        const int DATEQUOTED = 3;
+        const int CURRENCY = 4;
+        const int CUSTOMERNUMBER = 5;
+        const int CONTACTNAME = 6;
+        const int CONTACTEMAIL = 7;
+        const int CUSTOMERNAME = 8;
+        const int CUSTOMERADDRESS = 9;
+        const int CUSTOMERPHONE = 10;
+        const int CUSTOMERFAX = 11;
+        const int OPPORTUNITYID = 12;
+        const int REQUESTOR = 13;
+        const int RFQSTATUS = 14;
+
+
+        SqlConnection m_sqlConnect = null;
+        SqlCommand sqlCmd = null;
+        string[] strInputParameters;
+        string m_conString = ConfigurationManager.ConnectionStrings["RFQConnectionString"].ConnectionString;
+        private int m_nIdentityID = -1;
+        public RFQHeaderDB()
+        {
+            //
+            // TODO: Add constructor logic here
+            //
+        }
+        public void SetInputArray(string strParams)
+        {
+            strInputParameters = strParams.Split(',');
+
+
+
+        }
+        public bool DBConnect()
+        {
+            try
+            {
+                m_sqlConnect = new SqlConnection(m_conString);
+            }
+            catch (Exception err)
+            {
+
+                return false;
+            }
+
+            return true;
+
+        }
+
+
+        public bool CreateNewRFQHeaderRecord()
+        {
+
+            if (!DBConnect()) return false;
+
+            string strCMD = "INSERT into RFQHeader (RFQDescription," +
+                                                   "DateCreated," +
+                                                   "DateSubmitted," +
+                                                   "DateQuoted," +
+                                                   "Currency," +
+                                                   "CustomerNumber," +
+                                                   "ContactName," +
+                                                   "ContactEmail," +
+                                                   "CustomerName," +
+                                                   "CustomerAddress," +
+                                                   "CustomerPhone," +
+                                                   "CustomerFAX," +
+                                                   "OpportunityID," +
+                                                   "Requestor," +
+                                                   "RFQStatus)" +
+                                                   "VALUES (@rfqdescription," +
+                                                           "@datecreated," +
+                                                           "@datesubmitted," +
+                                                           "@datequoted," +
+                                                           "@currency," +
+                                                           "@customernumber," +
+                                                           "@contactname," +
+                                                           "@contactemail," +
+                                                           "@customername," +
+                                                           "@customeraddress," +
+                                                           "@customerphone," +
+                                                           "@customerfax," +
+                                                           "@opportunityid," +
+                                                           "@requestor," +
+                                                           "@rfqstatus)" + "Select Scope_Identity()"; 
+            try
+            {
+               
+                sqlCmd = new SqlCommand(strCMD, m_sqlConnect);
+                sqlCmd.CommandType = CommandType.Text;
+                sqlCmd.CommandText = strCMD;
+
+                //                sqlCmd.Parameters.AddWithValue("@rfqid", strInputParameters[0]);
+                sqlCmd.Parameters.AddWithValue("@rfqdescription", strInputParameters[0]);
+                sqlCmd.Parameters.AddWithValue("@datecreated", strInputParameters[1]);
+
+                sqlCmd.Parameters.AddWithValue("@datesubmitted", strInputParameters[2]);
+                sqlCmd.Parameters.AddWithValue("@datequoted", strInputParameters[3]);
+                sqlCmd.Parameters.AddWithValue("@currency", strInputParameters[4]);
+                sqlCmd.Parameters.AddWithValue("@customernumber", strInputParameters[5]);
+                sqlCmd.Parameters.AddWithValue("@contactname", strInputParameters[6]);
+                sqlCmd.Parameters.AddWithValue("@contactemail", strInputParameters[7]);
+                sqlCmd.Parameters.AddWithValue("@customername", strInputParameters[8]);
+                sqlCmd.Parameters.AddWithValue("@customeraddress", strInputParameters[9]);
+                sqlCmd.Parameters.AddWithValue("@customerphone", strInputParameters[10]);
+
+                sqlCmd.Parameters.AddWithValue("@customerfax", strInputParameters[11]);
+                sqlCmd.Parameters.AddWithValue("@opportunityid", strInputParameters[12]);
+                sqlCmd.Parameters.AddWithValue("@requestor", strInputParameters[13]);
+                sqlCmd.Parameters.AddWithValue("@rfqstatus", strInputParameters[14]);
+
+                try
+                {
+                    sqlCmd.Connection.Open();
+
+   
+                    m_nIdentityID = Convert.ToInt32(sqlCmd.ExecuteScalar());
+                }
+                catch (SqlException)
+                {
+                    // error here
+                }
+                finally
+                {
+                    DBClose();
+                }
+
+
+
+                return true;
+            }
+            catch (Exception err)
+            {
+
+            }
+            return false;
+
+        }
+
+
+        public bool DBClose()
+        {
+
+            m_sqlConnect.Close();
+            return true;
+        }
+
+        public bool InsertRFQHeaderRec()
+        {
+
+            return true;
+        }
+
+
+        public DataTable GetRFQIDRecord(string strConnectionString, string strRFQID)
+        {
+            DataTable dt = new DataTable();
+            string strCMD = "SELECT * FROM RFQHeader WHERE RFQID = " + strRFQID;
+
+            m_sqlConnect = new SqlConnection(strConnectionString);
+            sqlCmd = new SqlCommand(strCMD, m_sqlConnect);
+            sqlCmd.CommandType = CommandType.Text;
+            sqlCmd.CommandText = strCMD;
+            sqlCmd.Connection.Open();
+      
+
+            SqlDataReader dr = sqlCmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            dt.Load(dr);
+   
+            m_sqlConnect.Close();
+
+            return dt;
+
+
+        }
+        public int GetIndentityID()
+        {
+
+            return m_nIdentityID;
+        }
+
+        public bool UpdateRFQRecords(string strRFQID)
+        {
+
+
+
+            if (!DBConnect()) return false;
+
+            string strCMD = "Update RFQHeader SET RFQDescription = '" + strInputParameters[RFQDESCRIPTION] + "'," +
+                                                   "DateCreated = '" + Convert.ToDateTime (strInputParameters[DATECREATED]) + "'," +
+                                                   "DateSubmitted = '" + Convert.ToDateTime (strInputParameters[DATESUBMITTED]) + "'," +
+                                                   "DateQuoted = '" + Convert.ToDateTime(strInputParameters[DATEQUOTED]) + "'," +
+                                                   "Currency =  '" + strInputParameters[CURRENCY] + "'," +
+                                                   "CustomerNumber = '" + strInputParameters[CUSTOMERNUMBER] + "'," +
+                                                   "ContactName = '" + strInputParameters[CONTACTNAME] + "'," +
+                                                   "ContactEmail = '" + strInputParameters[CONTACTEMAIL] + "'," +
+                                                   "CustomerName = '" + strInputParameters[CUSTOMERNAME] + "'," +
+                                                   "CustomerAddress = '" + strInputParameters[CUSTOMERADDRESS] + "'," +
+                                                   "CustomerPhone =  '" + strInputParameters[CUSTOMERPHONE] + "'," +
+                                                   "CustomerFAX = '" + strInputParameters[CUSTOMERFAX] + "'," +
+                                                   "OpportunityID = '" + strInputParameters[OPPORTUNITYID] + "'," +
+                                                   "Requestor = '" + strInputParameters[REQUESTOR] + "'," +
+                                                   "RFQStatus = '" + strInputParameters[RFQSTATUS] + "' " +
+                                                   "WHERE RFQID = " + strRFQID  ;
+
+            sqlCmd = new SqlCommand(strCMD, m_sqlConnect);
+            sqlCmd.CommandType = CommandType.Text;
+            sqlCmd.CommandText = strCMD;
+
+            sqlCmd.Connection.Open();
+            sqlCmd.ExecuteNonQuery();
+            sqlCmd.Connection.Close();
+   
+            DBClose();
+
+            return true;
+        }
+    }
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- 
+    Note: As an alternative to hand editing this file you can use the 
+    web admin tool to configure settings for your application. Use
+    the Website->Asp.Net Configuration option in Visual Studio.
+    A full list of settings and comments can be found in 
+    machine.config.comments usually located in 
+    \Windows\Microsoft.Net\Framework\v2.x\Config 
+-->
+<configuration xmlns="http://schemas.microsoft.com/.NetConfiguration/v2.0">
+ 
+  
+  <connectionStrings>
+    <add name="ConnectionString" connectionString="Dsn=Meridian Rail"
+      providerName="System.Data.Odbc" />
+    <!-- 
+    <add name="RFDBConnectionString" connectionString="Data Source=DJP\SQLEXPRESS;Initial Catalog=RFDB;Integrated Security=True"
+      providerName="System.Data.SqlClient" />
+-->    
+    <add name="RFDBConnectionString" connectionString="Data Source=NEOTEK06XP\SQLEXPRESS;Initial Catalog=RFDB;Persist Security Info=True;User ID=AxleTracking;Password=password"
+      providerName="System.Data.SqlClient" />
+  </connectionStrings>
+	<system.web>
+		<!-- 
+            Set compilation debug="true" to insert debugging 
+            symbols into the compiled page. Because this 
+            affects performance, set this value to true only 
+            during development.
+        -->
+		<authorization>
+   <allow roles="Admin" />
+  </authorization>
+  <roleManager enabled="true" />
+  <compilation debug="true" defaultLanguage="c#" />
+		<!--
+            The <authentication> section enables configuration 
+            of the security authentication mode used by 
+            ASP.NET to identify an incoming user. 
+        -->
+    <authentication mode="Forms">
+       <forms name=".COOKIEDEMO" loginUrl="Login.aspx" />
+    </authentication>
+  </system.web>
+
+ <system.net>
+  <mailSettings>
+   <smtp from="">
+    <network host="exchange" password="" userName="" />
+   </smtp>
+  </mailSettings>
+ </system.net>
+</configuration>

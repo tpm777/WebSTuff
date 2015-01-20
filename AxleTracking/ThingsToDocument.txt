@@ -1,0 +1,1 @@
+Access rights to Logs must be set to +w, must inherit access from parent directory
